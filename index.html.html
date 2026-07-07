@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>医療略語 学習ツール</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f3f4f6;
+  --surface: #ffffff;
+  --surface2: #eceef2;
+  --border: #d8dce6;
+  --text: #181a20;
+  --text-muted: #6a718a;
+  --text-faint: #aab0c4;
+  --accent: #1a4a8a;
+  --accent-bg: #e6eef8;
+  --accent-text: #0f2d5a;
+  --green: #2a7a4b;
+  --green-bg: #e8f5ee;
+  --green-text: #1a5530;
+  --amber: #7a5000;
+  --amber-bg: #fdf3da;
+  --amber-text: #4c3100;
+  --coral: #9a3020;
+  --coral-bg: #fdeee8;
+  --coral-text: #6a1e10;
+  --purple: #5a348a;
+  --purple-bg: #f0eafa;
+  --purple-text: #3a1a6a;
+  --teal: #1a6a5a;
+  --teal-bg: #e4f4f0;
+  --teal-text: #0f4438;
+  --orange: #8a4a00;
+  --orange-bg: #fdf0e0;
+  --orange-text: #5a2e00;
+  --pink: #8a1a5a;
+  --pink-bg: #faeaf3;
+  --pink-text: #5a0a38;
+  --radius: 8px;
+  --radius-lg: 12px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Noto Sans JP', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; font-size: 14px; line-height: 1.6; }
+header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 1rem 1.5rem; position: sticky; top: 0; z-index: 100; }
+.header-inner { max-width: 1000px; margin: 0 auto; }
+.header-title { font-size: 15px; font-weight: 700; }
+.header-sub { font-size: 11px; color: var(--text-muted); font-family: 'DM Mono', monospace; }
+.main { max-width: 1000px; margin: 0 auto; padding: 1.25rem 1rem; }
+.controls { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 1.25rem; }
+.tab-group { display: flex; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; flex-wrap: wrap; }
+.tab { padding: 7px 11px; font-size: 12px; font-family: 'Noto Sans JP', sans-serif; border: none; background: transparent; color: var(--text-muted); cursor: pointer; border-right: 1px solid var(--border); transition: all 0.15s; white-space: nowrap; }
+.tab:last-child { border-right: none; }
+.tab.active { background: var(--accent); color: #fff; font-weight: 500; }
+.tab:hover:not(.active) { background: var(--surface2); }
+.search-wrap { flex: 1; min-width: 180px; position: relative; }
+.search-wrap input { width: 100%; padding: 7px 12px 7px 32px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); color: var(--text); font-size: 13px; font-family: 'Noto Sans JP', sans-serif; outline: none; transition: border-color 0.15s; }
+.search-wrap input:focus { border-color: var(--accent); }
+.search-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--text-faint); font-size: 14px; pointer-events: none; }
+.mode-group { display: flex; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+.mode-btn { padding: 7px 14px; font-size: 12.5px; font-family: 'Noto Sans JP', sans-serif; border: none; border-right: 1px solid var(--border); background: transparent; color: var(--text-muted); cursor: pointer; transition: all 0.15s; }
+.mode-btn:last-child { border-right: none; }
+.mode-btn.active { background: var(--green); color: #fff; font-weight: 500; }
+.mode-btn:hover:not(.active) { background: var(--surface2); }
+.count-label { font-size: 12px; color: var(--text-muted); white-space: nowrap; }
+.table-wrap { overflow-x: auto; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); }
+table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+th { background: var(--surface2); color: var(--text-muted); font-weight: 500; font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; padding: 9px 12px; text-align: left; border-bottom: 1px solid var(--border); white-space: nowrap; }
+td { padding: 9px 12px; border-bottom: 1px solid var(--border); color: var(--text); vertical-align: middle; }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: var(--surface2); }
+.abbr-cell { font-family: 'DM Mono', monospace; font-weight: 700; font-size: 14px; letter-spacing: 0.02em; }
+.full-cell { font-size: 12.5px; }
+.ja-cell { font-size: 12.5px; color: var(--text-muted); }
+.badge { display: inline-block; padding: 2px 8px; border-radius: 99px; font-size: 10px; white-space: nowrap; font-weight: 500; }
+.b-bone     { background: var(--amber-bg);  color: var(--amber-text); }
+.b-ligament { background: var(--coral-bg);  color: var(--coral-text); }
+.b-muscle   { background: var(--purple-bg); color: var(--purple-text); }
+.b-nerve    { background: var(--teal-bg);   color: var(--teal-text); }
+.b-joint    { background: var(--accent-bg); color: var(--accent-text); }
+.b-landmark { background: var(--orange-bg); color: var(--orange-text); }
+.b-test     { background: var(--green-bg);  color: var(--green-text); }
+.b-motion   { background: var(--pink-bg);   color: var(--pink-text); }
+.b-disease  { background: var(--orange-bg); color: var(--orange-text); }
+.b-other    { background: var(--surface2);  color: var(--text-muted); }
+/* QUIZ */
+.quiz-wrap { display: flex; flex-direction: column; gap: 1rem; }
+.quiz-progress-bar { height: 4px; background: var(--border); border-radius: 99px; overflow: hidden; margin-bottom: 0.25rem; }
+.quiz-progress-fill { height: 100%; background: var(--accent); border-radius: 99px; transition: width 0.3s ease; }
+.quiz-meta { display: flex; justify-content: space-between; font-size: 12px; color: var(--text-muted); margin-bottom: 0.5rem; }
+.quiz-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 1.5rem; }
+.quiz-q { font-size: 17px; font-weight: 700; color: var(--text); margin-bottom: 1.25rem; line-height: 1.5; }
+.quiz-tag { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 4px; margin-bottom: 0.75rem; font-family: 'DM Mono', monospace; }
+.options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+@media (max-width: 500px) { .options-grid { grid-template-columns: 1fr; } }
+.option-btn { padding: 11px 14px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); color: var(--text); font-size: 12.5px; font-family: 'Noto Sans JP', sans-serif; cursor: pointer; text-align: left; line-height: 1.5; transition: all 0.15s; }
+.option-btn:hover:not(:disabled) { background: var(--surface2); border-color: var(--accent); }
+.option-btn.correct { background: var(--green-bg); border-color: var(--green); color: var(--green-text); font-weight: 500; }
+.option-btn.wrong   { background: var(--coral-bg); border-color: var(--coral); color: var(--coral-text); }
+.option-btn:disabled { cursor: default; }
+.hint-box { margin-top: 1rem; background: var(--surface2); border-radius: var(--radius); padding: 10px 14px; font-size: 12.5px; color: var(--text-muted); line-height: 1.8; display: none; border-left: 3px solid var(--accent); }
+.hint-abbr { font-family: 'DM Mono', monospace; font-weight: 700; font-size: 15px; color: var(--text); }
+.quiz-nav { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
+.score-display { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--text-muted); }
+.score-num { font-size: 18px; font-weight: 700; color: var(--text); font-family: 'DM Mono', monospace; }
+.btn { padding: 8px 18px; border-radius: var(--radius); border: 1px solid var(--border); background: var(--surface); color: var(--text); font-size: 13px; font-family: 'Noto Sans JP', sans-serif; cursor: pointer; transition: all 0.15s; }
+.btn:hover:not(:disabled) { background: var(--surface2); }
+.btn:disabled { opacity: 0.4; cursor: default; }
+.btn-primary { background: var(--accent); color: #fff; border-color: transparent; font-weight: 500; }
+.btn-primary:hover:not(:disabled) { background: var(--accent-text); }
+.result-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 2rem; text-align: center; }
+.result-score { font-size: 52px; font-weight: 700; font-family: 'DM Mono', monospace; color: var(--accent); line-height: 1; }
+.result-label { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
+.result-pct { font-size: 22px; font-weight: 700; margin-top: 8px; }
+.result-msg { font-size: 14px; color: var(--text-muted); margin-top: 12px; margin-bottom: 1.5rem; }
+.empty-state { text-align: center; padding: 3rem 1rem; color: var(--text-muted); }
+</style>
+</head>
+<body>
+<header>
+  <div class="header-inner">
+    <div class="header-title">医療略語 学習ツール</div>
+    <div class="header-sub">PT必須 — 骨・靭帯・筋・神経・関節・運動・テスト・疾患・評価</div>
+  </div>
+</header>
+<div class="main">
+  <div class="controls">
+    <div class="tab-group" id="tabGroup">
+      <button class="tab active" onclick="setGroup('all')">すべて</button>
+      <button class="tab" onclick="setGroup('bone')">骨・ランドマーク</button>
+      <button class="tab" onclick="setGroup('ligament')">靭帯・軟部組織</button>
+      <button class="tab" onclick="setGroup('muscle')">筋</button>
+      <button class="tab" onclick="setGroup('nerve')">神経・血管</button>
+      <button class="tab" onclick="setGroup('joint')">関節・部位</button>
+      <button class="tab" onclick="setGroup('motion')">運動・肢位</button>
+      <button class="tab" onclick="setGroup('test')">検査・テスト</button>
+      <button class="tab" onclick="setGroup('disease')">疾患・障害</button>
+      <button class="tab" onclick="setGroup('other')">評価・その他</button>
+    </div>
+    <div class="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="searchInput" placeholder="略語・正式名・日本語で絞り込み…" oninput="onSearch()">
+    </div>
+    <div class="mode-group">
+      <button class="mode-btn active" id="btnTable" onclick="setMode('table')">一覧</button>
+      <button class="mode-btn" id="btnQuiz" onclick="setMode('quiz')">クイズ</button>
+    </div>
+    <span class="count-label" id="countLabel"></span>
+  </div>
+
+  <div id="tableView">
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th style="min-width:70px">略語</th>
+            <th style="min-width:60px">カテゴリ</th>
+            <th style="min-width:220px">正式名称（英語）</th>
+            <th style="min-width:160px">日本語</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div id="quizView" style="display:none">
+    <div class="quiz-wrap">
+      <div>
+        <div class="quiz-progress-bar"><div class="quiz-progress-fill" id="progressFill" style="width:0%"></div></div>
+        <div class="quiz-meta"><span id="quizCounter">1 / 20</span><span id="quizMode"></span></div>
+      </div>
+      <div id="quizContent"></div>
+      <div class="quiz-nav">
+        <div class="score-display"><span class="score-num" id="scoreNum">0</span><span>/ <span id="scoreDen">0</span> 正解</span></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="btn" onclick="restartQuiz()">最初から</button>
+          <button class="btn btn-primary" id="nextBtn" onclick="nextQuiz()" disabled>次へ →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const DATA = [
+  // ===== 骨・ランドマーク =====
+  { group:'bone', abbr:'ASIS', full:'Anterior Superior Iliac Spine', ja:'上前腸骨棘' },
+  { group:'bone', abbr:'AIIS', full:'Anterior Inferior Iliac Spine', ja:'下前腸骨棘' },
+  { group:'bone', abbr:'PSIS', full:'Posterior Superior Iliac Spine', ja:'上後腸骨棘' },
+  { group:'bone', abbr:'PIIS', full:'Posterior Inferior Iliac Spine', ja:'下後腸骨棘' },
+  { group:'bone', abbr:'GT',   full:'Greater Trochanter', ja:'大転子' },
+  { group:'bone', abbr:'LT',   full:'Lesser Trochanter', ja:'小転子' },
+  { group:'bone', abbr:'LE',   full:'Lateral Epicondyle', ja:'外側上顆' },
+  { group:'bone', abbr:'ME',   full:'Medial Epicondyle', ja:'内側上顆' },
+  { group:'bone', abbr:'LM',   full:'Lateral Malleolus', ja:'外果' },
+  { group:'bone', abbr:'MM',   full:'Medial Malleolus', ja:'内果' },
+  { group:'bone', abbr:'TT',   full:'Tibial Tuberosity', ja:'脛骨粗面' },
+  { group:'bone', abbr:'FH',   full:'Femoral Head', ja:'大腿骨頭' },
+  { group:'bone', abbr:'AC',   full:'Acromioclavicular', ja:'肩鎖（関節）' },
+  { group:'bone', abbr:'CP',   full:'Coracoid Process', ja:'烏口突起' },
+  { group:'bone', abbr:'C1-C7', full:'Cervical Vertebrae 1–7', ja:'頸椎1〜7番' },
+  { group:'bone', abbr:'T1-T12', full:'Thoracic Vertebrae 1–12', ja:'胸椎1〜12番' },
+  { group:'bone', abbr:'L1-L5', full:'Lumbar Vertebrae 1–5', ja:'腰椎1〜5番' },
+  { group:'bone', abbr:'S1-S5', full:'Sacral Vertebrae 1–5', ja:'仙椎1〜5番' },
+  { group:'bone', abbr:'SP',   full:'Spinous Process', ja:'棘突起' },
+  { group:'bone', abbr:'TP',   full:'Transverse Process', ja:'横突起' },
+  { group:'bone', abbr:'IVD',  full:'Intervertebral Disc', ja:'椎間板' },
+  { group:'bone', abbr:'IVF',  full:'Intervertebral Foramen', ja:'椎間孔' },
+  { group:'bone', abbr:'NAP',  full:'Navicular', ja:'舟状骨' },
+  { group:'bone', abbr:'MCP',  full:'Metacarpophalangeal Joint', ja:'中手指節関節' },
+  { group:'bone', abbr:'MTP',  full:'Metatarsophalangeal Joint', ja:'中足趾節関節' },
+
+  // ===== 靭帯・軟部組織 =====
+  { group:'ligament', abbr:'ACL',  full:'Anterior Cruciate Ligament', ja:'前十字靭帯' },
+  { group:'ligament', abbr:'PCL',  full:'Posterior Cruciate Ligament', ja:'後十字靭帯' },
+  { group:'ligament', abbr:'MCL',  full:'Medial Collateral Ligament', ja:'内側側副靭帯' },
+  { group:'ligament', abbr:'LCL',  full:'Lateral Collateral Ligament', ja:'外側側副靭帯' },
+  { group:'ligament', abbr:'CHL',  full:'Coracohumeral Ligament', ja:'烏口上腕靭帯' },
+  { group:'ligament', abbr:'IGHL', full:'Inferior Glenohumeral Ligament', ja:'下関節上腕靭帯' },
+  { group:'ligament', abbr:'MGHL', full:'Middle Glenohumeral Ligament', ja:'中関節上腕靭帯' },
+  { group:'ligament', abbr:'SGHL', full:'Superior Glenohumeral Ligament', ja:'上関節上腕靭帯' },
+  { group:'ligament', abbr:'PLL',  full:'Posterior Longitudinal Ligament', ja:'後縦靭帯' },
+  { group:'ligament', abbr:'ALL',  full:'Anterior Longitudinal Ligament', ja:'前縦靭帯' },
+  { group:'ligament', abbr:'SSL',  full:'Supraspinous Ligament', ja:'棘上靭帯' },
+  { group:'ligament', abbr:'ISL',  full:'Interspinous Ligament', ja:'棘間靭帯' },
+  { group:'ligament', abbr:'LF',   full:'Ligamentum Flavum', ja:'黄色靭帯' },
+  { group:'ligament', abbr:'IT band / ITB', full:'Iliotibial Band', ja:'腸脛靭帯' },
+  { group:'ligament', abbr:'PF',   full:'Plantar Fascia', ja:'足底腱膜' },
+  { group:'ligament', abbr:'RC',   full:'Rotator Cuff', ja:'ローテーターカフ' },
+  { group:'ligament', abbr:'SLAP', full:'Superior Labrum Anterior to Posterior', ja:'上方関節唇前後裂損傷' },
+  { group:'ligament', abbr:'TFCC', full:'Triangular Fibrocartilage Complex', ja:'三角線維軟骨複合体' },
+  { group:'ligament', abbr:'ATFL', full:'Anterior Talofibular Ligament', ja:'前距腓靭帯' },
+  { group:'ligament', abbr:'CFL',  full:'Calcaneofibular Ligament', ja:'踵腓靭帯' },
+  { group:'ligament', abbr:'PTFL', full:'Posterior Talofibular Ligament', ja:'後距腓靭帯' },
+  { group:'ligament', abbr:'CL',   full:'Capsular Ligament', ja:'関節包靭帯' },
+  { group:'ligament', abbr:'LM (meniscus)', full:'Lateral Meniscus', ja:'外側半月板' },
+  { group:'ligament', abbr:'MM (meniscus)', full:'Medial Meniscus', ja:'内側半月板' },
+
+  // ===== 筋 =====
+  { group:'muscle', abbr:'Quad / QF', full:'Quadriceps Femoris', ja:'大腿四頭筋' },
+  { group:'muscle', abbr:'Ham',  full:'Hamstrings', ja:'ハムストリングス' },
+  { group:'muscle', abbr:'Glut Max', full:'Gluteus Maximus', ja:'大殿筋' },
+  { group:'muscle', abbr:'Glut Med', full:'Gluteus Medius', ja:'中殿筋' },
+  { group:'muscle', abbr:'Glut Min', full:'Gluteus Minimus', ja:'小殿筋' },
+  { group:'muscle', abbr:'TA',   full:'Tibialis Anterior', ja:'前脛骨筋' },
+  { group:'muscle', abbr:'TP',   full:'Tibialis Posterior', ja:'後脛骨筋' },
+  { group:'muscle', abbr:'RF',   full:'Rectus Femoris', ja:'大腿直筋' },
+  { group:'muscle', abbr:'VL',   full:'Vastus Lateralis', ja:'外側広筋' },
+  { group:'muscle', abbr:'VM',   full:'Vastus Medialis', ja:'内側広筋' },
+  { group:'muscle', abbr:'VMO',  full:'Vastus Medialis Oblique', ja:'内側広筋斜頭' },
+  { group:'muscle', abbr:'VI',   full:'Vastus Intermedius', ja:'中間広筋' },
+  { group:'muscle', abbr:'BF',   full:'Biceps Femoris', ja:'大腿二頭筋' },
+  { group:'muscle', abbr:'ST',   full:'Semitendinosus', ja:'半腱様筋' },
+  { group:'muscle', abbr:'SM',   full:'Semimembranosus', ja:'半膜様筋' },
+  { group:'muscle', abbr:'Gastroc', full:'Gastrocnemius', ja:'腓腹筋' },
+  { group:'muscle', abbr:'Sol',  full:'Soleus', ja:'ヒラメ筋' },
+  { group:'muscle', abbr:'Pec Maj', full:'Pectoralis Major', ja:'大胸筋' },
+  { group:'muscle', abbr:'Pec Min', full:'Pectoralis Minor', ja:'小胸筋' },
+  { group:'muscle', abbr:'Trap', full:'Trapezius', ja:'僧帽筋' },
+  { group:'muscle', abbr:'SA',   full:'Serratus Anterior', ja:'前鋸筋' },
+  { group:'muscle', abbr:'Delt', full:'Deltoid', ja:'三角筋' },
+  { group:'muscle', abbr:'Supra', full:'Supraspinatus', ja:'棘上筋' },
+  { group:'muscle', abbr:'Infra', full:'Infraspinatus', ja:'棘下筋' },
+  { group:'muscle', abbr:'Subscap', full:'Subscapularis', ja:'肩甲下筋' },
+  { group:'muscle', abbr:'TM',   full:'Teres Minor', ja:'小円筋' },
+  { group:'muscle', abbr:'Bic',  full:'Biceps Brachii', ja:'上腕二頭筋' },
+  { group:'muscle', abbr:'Tric', full:'Triceps Brachii', ja:'上腕三頭筋' },
+  { group:'muscle', abbr:'SCM',  full:'Sternocleidomastoid', ja:'胸鎖乳突筋' },
+  { group:'muscle', abbr:'RA',   full:'Rectus Abdominis', ja:'腹直筋' },
+  { group:'muscle', abbr:'EO',   full:'External Oblique', ja:'外腹斜筋' },
+  { group:'muscle', abbr:'IO',   full:'Internal Oblique', ja:'内腹斜筋' },
+  { group:'muscle', abbr:'TrA',  full:'Transversus Abdominis', ja:'腹横筋' },
+  { group:'muscle', abbr:'ES',   full:'Erector Spinae', ja:'脊柱起立筋' },
+  { group:'muscle', abbr:'MF',   full:'Multifidus', ja:'多裂筋' },
+  { group:'muscle', abbr:'IL',   full:'Iliopsoas', ja:'腸腰筋' },
+  { group:'muscle', abbr:'PerL', full:'Peroneus Longus / Fibularis Longus', ja:'長腓骨筋' },
+  { group:'muscle', abbr:'PerB', full:'Peroneus Brevis / Fibularis Brevis', ja:'短腓骨筋' },
+  { group:'muscle', abbr:'Add Mag', full:'Adductor Magnus', ja:'大内転筋' },
+
+  // ===== 神経・血管 =====
+  { group:'nerve', abbr:'CN',   full:'Cranial Nerve', ja:'脳神経' },
+  { group:'nerve', abbr:'CPN / CFN', full:'Common Peroneal Nerve / Common Fibular Nerve', ja:'総腓骨神経' },
+  { group:'nerve', abbr:'DPN',  full:'Deep Peroneal Nerve / Deep Fibular Nerve', ja:'深腓骨神経' },
+  { group:'nerve', abbr:'SPN',  full:'Superficial Peroneal Nerve / Superficial Fibular Nerve', ja:'浅腓骨神経' },
+  { group:'nerve', abbr:'TN',   full:'Tibial Nerve', ja:'脛骨神経' },
+  { group:'nerve', abbr:'FN',   full:'Femoral Nerve', ja:'大腿神経' },
+  { group:'nerve', abbr:'SN',   full:'Sciatic Nerve', ja:'坐骨神経' },
+  { group:'nerve', abbr:'ON',   full:'Obturator Nerve', ja:'閉鎖神経' },
+  { group:'nerve', abbr:'MN',   full:'Median Nerve', ja:'正中神経' },
+  { group:'nerve', abbr:'UN',   full:'Ulnar Nerve', ja:'尺骨神経' },
+  { group:'nerve', abbr:'RN',   full:'Radial Nerve', ja:'橈骨神経' },
+  { group:'nerve', abbr:'MCN',  full:'Musculocutaneous Nerve', ja:'筋皮神経' },
+  { group:'nerve', abbr:'AXN',  full:'Axillary Nerve', ja:'腋窩神経' },
+  { group:'nerve', abbr:'LTN',  full:'Long Thoracic Nerve', ja:'長胸神経' },
+  { group:'nerve', abbr:'SSN',  full:'Suprascapular Nerve', ja:'肩甲上神経' },
+  { group:'nerve', abbr:'DSN',  full:'Dorsal Scapular Nerve', ja:'肩甲背神経' },
+  { group:'nerve', abbr:'SuGN', full:'Superior Gluteal Nerve', ja:'上殿神経' },
+  { group:'nerve', abbr:'InGN', full:'Inferior Gluteal Nerve', ja:'下殿神経' },
+  { group:'nerve', abbr:'ANS',  full:'Autonomic Nervous System', ja:'自律神経系' },
+  { group:'nerve', abbr:'CNS',  full:'Central Nervous System', ja:'中枢神経系' },
+  { group:'nerve', abbr:'PNS',  full:'Peripheral Nervous System', ja:'末梢神経系' },
+  { group:'nerve', abbr:'CVA',  full:'Cerebrovascular Accident', ja:'脳血管障害（脳卒中）' },
+  { group:'nerve', abbr:'SCI',  full:'Spinal Cord Injury', ja:'脊髄損傷' },
+  { group:'nerve', abbr:'ABI',  full:'Ankle Brachial Index', ja:'足関節上腕血圧比' },
+  { group:'nerve', abbr:'DVT',  full:'Deep Vein Thrombosis', ja:'深部静脈血栓症' },
+
+  // ===== 関節・部位 =====
+  { group:'joint', abbr:'GH',   full:'Glenohumeral Joint', ja:'肩甲上腕関節' },
+  { group:'joint', abbr:'AC',   full:'Acromioclavicular Joint', ja:'肩鎖関節' },
+  { group:'joint', abbr:'SC',   full:'Sternoclavicular Joint', ja:'胸鎖関節' },
+  { group:'joint', abbr:'ST',   full:'Scapulothoracic Joint', ja:'肩甲胸郭関節' },
+  { group:'joint', abbr:'TF',   full:'Tibiofemoral Joint', ja:'脛骨大腿関節' },
+  { group:'joint', abbr:'PF',   full:'Patellofemoral Joint', ja:'膝蓋大腿関節' },
+  { group:'joint', abbr:'SI',   full:'Sacroiliac Joint', ja:'仙腸関節' },
+  { group:'joint', abbr:'HJ',   full:'Hip Joint', ja:'股関節' },
+  { group:'joint', abbr:'KJ',   full:'Knee Joint', ja:'膝関節' },
+  { group:'joint', abbr:'TTC',  full:'Talocrural Joint', ja:'距腿関節（足関節）' },
+  { group:'joint', abbr:'STJ',  full:'Subtalar Joint', ja:'距骨下関節' },
+  { group:'joint', abbr:'IP',   full:'Interphalangeal Joint', ja:'指節間関節' },
+  { group:'joint', abbr:'PIP',  full:'Proximal Interphalangeal Joint', ja:'近位指節間関節' },
+  { group:'joint', abbr:'DIP',  full:'Distal Interphalangeal Joint', ja:'遠位指節間関節' },
+  { group:'joint', abbr:'CMC',  full:'Carpometacarpal Joint', ja:'手根中手関節' },
+  { group:'joint', abbr:'RC',   full:'Radiocarpal Joint', ja:'橈骨手根関節' },
+  { group:'joint', abbr:'UH',   full:'Ulnohumeral Joint', ja:'腕尺関節' },
+  { group:'joint', abbr:'RH',   full:'Radiohumeral Joint', ja:'腕橈関節' },
+  { group:'joint', abbr:'PRUJ', full:'Proximal Radioulnar Joint', ja:'近位橈尺関節' },
+  { group:'joint', abbr:'DRUJ', full:'Distal Radioulnar Joint', ja:'遠位橈尺関節' },
+  { group:'joint', abbr:'LS',   full:'Lumbosacral', ja:'腰仙部' },
+  { group:'joint', abbr:'CS',   full:'Cervicothoracic', ja:'頸胸移行部' },
+  { group:'joint', abbr:'UE',   full:'Upper Extremity', ja:'上肢' },
+  { group:'joint', abbr:'LE',   full:'Lower Extremity', ja:'下肢' },
+  { group:'joint', abbr:'B/L',  full:'Bilateral', ja:'両側' },
+  { group:'joint', abbr:'U/L',  full:'Unilateral', ja:'片側' },
+
+  // ===== 運動・肢位 =====
+  { group:'motion', abbr:'ROM',  full:'Range of Motion', ja:'関節可動域' },
+  { group:'motion', abbr:'AROM', full:'Active Range of Motion', ja:'自動関節可動域' },
+  { group:'motion', abbr:'PROM', full:'Passive Range of Motion', ja:'他動関節可動域' },
+  { group:'motion', abbr:'AAROM', full:'Active-Assisted Range of Motion', ja:'自動介助関節可動域' },
+  { group:'motion', abbr:'DF',   full:'Dorsiflexion', ja:'背屈' },
+  { group:'motion', abbr:'PF',   full:'Plantarflexion', ja:'底屈' },
+  { group:'motion', abbr:'Inv',  full:'Inversion', ja:'内返し' },
+  { group:'motion', abbr:'Ev',   full:'Eversion', ja:'外返し' },
+  { group:'motion', abbr:'Flex', full:'Flexion', ja:'屈曲' },
+  { group:'motion', abbr:'Ext',  full:'Extension', ja:'伸展' },
+  { group:'motion', abbr:'Abd',  full:'Abduction', ja:'外転' },
+  { group:'motion', abbr:'Add',  full:'Adduction', ja:'内転' },
+  { group:'motion', abbr:'IR',   full:'Internal Rotation', ja:'内旋' },
+  { group:'motion', abbr:'ER',   full:'External Rotation', ja:'外旋' },
+  { group:'motion', abbr:'Sup',  full:'Supination', ja:'回外' },
+  { group:'motion', abbr:'Pro',  full:'Pronation', ja:'回内' },
+  { group:'motion', abbr:'LF',   full:'Lateral Flexion', ja:'側屈' },
+  { group:'motion', abbr:'Rot',  full:'Rotation', ja:'回旋' },
+  { group:'motion', abbr:'Horiz Abd', full:'Horizontal Abduction', ja:'水平外転' },
+  { group:'motion', abbr:'Horiz Add', full:'Horizontal Adduction', ja:'水平内転' },
+  { group:'motion', abbr:'WB',   full:'Weight Bearing', ja:'荷重' },
+  { group:'motion', abbr:'NWB',  full:'Non-Weight Bearing', ja:'非荷重' },
+  { group:'motion', abbr:'PWB',  full:'Partial Weight Bearing', ja:'部分荷重' },
+  { group:'motion', abbr:'FWB',  full:'Full Weight Bearing', ja:'全荷重' },
+  { group:'motion', abbr:'OKC',  full:'Open Kinetic Chain', ja:'開放運動連鎖' },
+  { group:'motion', abbr:'CKC',  full:'Closed Kinetic Chain', ja:'閉鎖運動連鎖' },
+  { group:'motion', abbr:'COG',  full:'Center of Gravity', ja:'重心' },
+  { group:'motion', abbr:'COP',  full:'Center of Pressure', ja:'圧力中心' },
+  { group:'motion', abbr:'BOS',  full:'Base of Support', ja:'支持基底面' },
+
+  // ===== 検査・テスト =====
+  { group:'test', abbr:'Lachman Test', full:'Lachman Test', ja:'ラックマンテスト（ACL検査）' },
+  { group:'test', abbr:'Ant Drawer', full:'Anterior Drawer Test', ja:'前方引き出しテスト（ACL・足関節）' },
+  { group:'test', abbr:'Post Drawer', full:'Posterior Drawer Test', ja:'後方引き出しテスト（PCL）' },
+  { group:'test', abbr:'Pivot Shift', full:'Pivot Shift Test', ja:'ピボットシフトテスト（ACL）' },
+  { group:'test', abbr:'McMurray', full:'McMurray Test', ja:'マクマレーテスト（半月板）' },
+  { group:'test', abbr:'Thessaly', full:'Thessaly Test', ja:'テッサリーテスト（半月板）' },
+  { group:'test', abbr:'Apley',   full:'Apley Compression/Distraction Test', ja:'アプレーテスト（半月板）' },
+  { group:'test', abbr:'Valgus Stress', full:'Valgus Stress Test', ja:'外反ストレステスト（MCL）' },
+  { group:'test', abbr:'Varus Stress', full:'Varus Stress Test', ja:'内反ストレステスト（LCL）' },
+  { group:'test', abbr:'FABER',   full:'Flexion Abduction External Rotation Test', ja:'ファベールテスト（股関節・SI関節）' },
+  { group:'test', abbr:'FADIR',   full:'Flexion Adduction Internal Rotation Test', ja:'ファディールテスト（FAI）' },
+  { group:'test', abbr:'Thomas Test', full:'Thomas Test', ja:'トーマステスト（腸腰筋短縮）' },
+  { group:'test', abbr:'Ober Test',   full:'Ober Test', ja:'オーバーテスト（IT band短縮）' },
+  { group:'test', abbr:'SLR',     full:'Straight Leg Raise Test', ja:'下肢伸展挙上テスト（腰椎神経根）' },
+  { group:'test', abbr:'Slump',   full:'Slump Test', ja:'スランプテスト（坐骨神経）' },
+  { group:'test', abbr:'Spurling', full:'Spurling Test', ja:'スパーリングテスト（頸椎神経根）' },
+  { group:'test', abbr:'Distraction', full:'Cervical Distraction Test', ja:'頸椎牽引テスト（神経根症）' },
+  { group:'test', abbr:'Empty Can', full:'Empty Can Test / Jobe Test', ja:'エンプティカンテスト（棘上筋）' },
+  { group:'test', abbr:'Full Can',  full:'Full Can Test', ja:'フルカンテスト（棘上筋）' },
+  { group:'test', abbr:'Hawkins',  full:'Hawkins-Kennedy Test', ja:'ホーキンスケネディテスト（インピンジメント）' },
+  { group:'test', abbr:'Neer',    full:'Neer Impingement Test', ja:'ニアーテスト（インピンジメント）' },
+  { group:'test', abbr:'Speed Test', full:'Speed Test / Bicipital Groove Test', ja:'スピードテスト（上腕二頭筋長頭腱）' },
+  { group:'test', abbr:'Yergason', full:'Yergason Test', ja:'ヤーガソンテスト（上腕二頭筋長頭腱）' },
+  { group:'test', abbr:'Load & Shift', full:'Load and Shift Test', ja:'ロードアンドシフトテスト（肩関節不安定性）' },
+  { group:'test', abbr:'Apprehension', full:'Apprehension Test', ja:'アプリヘンションテスト（肩関節前方不安定性）' },
+  { group:'test', abbr:'O\'Brien', full:"O'Brien Active Compression Test", ja:"オブライエンテスト（SLAP）" },
+  { group:'test', abbr:'Phalen',  full:'Phalen Test', ja:'ファーレンテスト（手根管症候群）' },
+  { group:'test', abbr:'Tinel',   full:'Tinel Sign', ja:'チネルサイン（神経刺激）' },
+  { group:'test', abbr:'Finkelstein', full:'Finkelstein Test', ja:'フィンケルシュタインテスト（De Quervain病）' },
+  { group:'test', abbr:'Thompson', full:'Thompson Test', ja:'トンプソンテスト（アキレス腱断裂）' },
+  { group:'test', abbr:'Homan',   full:'Homan Sign', ja:'ホーマンズサイン（DVT）' },
+  { group:'test', abbr:'Patrick', full:'Patrick Test (=FABER)', ja:'パトリックテスト（股関節・SI関節）' },
+  { group:'test', abbr:'Gaenslen', full:'Gaenslen Test', ja:'ゲンズレンテスト（SI関節）' },
+  { group:'test', abbr:'ASLR',    full:'Active Straight Leg Raise Test', ja:'能動的下肢伸展挙上テスト（骨盤帯安定性）' },
+  { group:'test', abbr:'Trendelenburg', full:'Trendelenburg Test', ja:'トレンデレンブルグテスト（中殿筋）' },
+
+  // ===== 評価・その他 =====
+  { group:'other', abbr:'MMT',   full:'Manual Muscle Test', ja:'徒手筋力検査' },
+  { group:'other', abbr:'VAS',   full:'Visual Analogue Scale', ja:'視覚的アナログスケール（疼痛評価）' },
+  { group:'other', abbr:'NRS',   full:'Numeric Rating Scale', ja:'数値評価スケール（疼痛）' },
+  { group:'other', abbr:'FIM',   full:'Functional Independence Measure', ja:'機能的自立度評価法' },
+  { group:'other', abbr:'ADL',   full:'Activities of Daily Living', ja:'日常生活活動' },
+  { group:'other', abbr:'IADL',  full:'Instrumental Activities of Daily Living', ja:'手段的日常生活活動' },
+  { group:'other', abbr:'QOL',   full:'Quality of Life', ja:'生活の質' },
+  { group:'other', abbr:'MRI',   full:'Magnetic Resonance Imaging', ja:'磁気共鳴画像' },
+  { group:'other', abbr:'CT',    full:'Computed Tomography', ja:'コンピュータ断層撮影' },
+  { group:'other', abbr:'XP / X-ray', full:'X-ray / Radiograph', ja:'X線（レントゲン）' },
+  { group:'other', abbr:'US',    full:'Ultrasound', ja:'超音波' },
+  { group:'other', abbr:'EMG',   full:'Electromyography', ja:'筋電図' },
+  { group:'other', abbr:'NCV',   full:'Nerve Conduction Velocity', ja:'神経伝導速度' },
+  { group:'other', abbr:'DEXA',  full:'Dual-Energy X-ray Absorptiometry', ja:'骨密度測定（DXA）' },
+  { group:'other', abbr:'BMI',   full:'Body Mass Index', ja:'体格指数' },
+  { group:'other', abbr:'HR',    full:'Heart Rate', ja:'心拍数' },
+  { group:'other', abbr:'BP',    full:'Blood Pressure', ja:'血圧' },
+  { group:'other', abbr:'SpO2',  full:'Peripheral Oxygen Saturation', ja:'経皮的動脈血酸素飽和度' },
+  { group:'other', abbr:'RPE',   full:'Rating of Perceived Exertion', ja:'主観的運動強度（ボルグスケール）' },
+  { group:'other', abbr:'MET',   full:'Metabolic Equivalent of Task', ja:'メッツ（運動強度単位）' },
+  { group:'other', abbr:'HEP',   full:'Home Exercise Program', ja:'自主トレーニングプログラム' },
+  { group:'other', abbr:'Hx',    full:'History', ja:'既往歴' },
+  { group:'other', abbr:'Dx',    full:'Diagnosis', ja:'診断' },
+  { group:'other', abbr:'Rx',    full:'Treatment / Prescription', ja:'治療・処方' },
+  { group:'other', abbr:'Sx',    full:'Symptoms', ja:'症状' },
+  { group:'other', abbr:'Fx',    full:'Fracture', ja:'骨折' },
+  { group:'other', abbr:'Tx',    full:'Traction / Therapy', ja:'牽引・治療' },
+  { group:'other', abbr:'OA',    full:'Osteoarthritis', ja:'変形性関節症' },
+  { group:'other', abbr:'RA',    full:'Rheumatoid Arthritis', ja:'関節リウマチ' },
+  { group:'other', abbr:'LBP',   full:'Low Back Pain', ja:'腰痛' },
+  { group:'other', abbr:'TKA',   full:'Total Knee Arthroplasty', ja:'人工膝関節全置換術' },
+  { group:'other', abbr:'THA',   full:'Total Hip Arthroplasty', ja:'人工股関節全置換術' },
+  { group:'other', abbr:'ORIF',  full:'Open Reduction and Internal Fixation', ja:'観血的整復内固定術' },
+  { group:'other', abbr:'ACR',   full:'American College of Rheumatology', ja:'米国リウマチ学会' },
+  { group:'other', abbr:'ICF',   full:'International Classification of Functioning, Disability and Health', ja:'国際生活機能分類' },
+
+  // ===== 疾患・障害（神経系：中枢） =====
+  { group:'disease', abbr:'CVA',  full:'Cerebrovascular Accident', ja:'脳血管障害（脳卒中）' },
+  { group:'disease', abbr:'ICH',  full:'Intracerebral Hemorrhage', ja:'脳内出血' },
+  { group:'disease', abbr:'SAH',  full:'Subarachnoid Hemorrhage', ja:'くも膜下出血' },
+  { group:'disease', abbr:'SDH',  full:'Subdural Hematoma', ja:'硬膜下血腫' },
+  { group:'disease', abbr:'EDH',  full:'Epidural Hematoma', ja:'硬膜外血腫' },
+  { group:'disease', abbr:'TIA',  full:'Transient Ischemic Attack', ja:'一過性脳虚血発作' },
+  { group:'disease', abbr:'MCA',  full:'Middle Cerebral Artery (infarction)', ja:'中大脳動脈（梗塞）' },
+  { group:'disease', abbr:'TBI',  full:'Traumatic Brain Injury', ja:'外傷性脳損傷' },
+  { group:'disease', abbr:'ABI',  full:'Acquired Brain Injury', ja:'後天性脳損傷' },
+  { group:'disease', abbr:'MS',   full:'Multiple Sclerosis', ja:'多発性硬化症' },
+  { group:'disease', abbr:'PD',   full:'Parkinson\'s Disease', ja:'パーキンソン病' },
+  { group:'disease', abbr:'HD',   full:'Huntington\'s Disease', ja:'ハンチントン病' },
+  { group:'disease', abbr:'AD',   full:'Alzheimer\'s Disease', ja:'アルツハイマー病' },
+  { group:'disease', abbr:'SCD',  full:'Spinocerebellar Degeneration', ja:'脊髄小脳変性症' },
+  { group:'disease', abbr:'PSP',  full:'Progressive Supranuclear Palsy', ja:'進行性核上性麻痺' },
+  { group:'disease', abbr:'MSA',  full:'Multiple System Atrophy', ja:'多系統萎縮症' },
+  { group:'disease', abbr:'CP',   full:'Cerebral Palsy', ja:'脳性麻痺' },
+  { group:'disease', abbr:'NPH',  full:'Normal Pressure Hydrocephalus', ja:'正常圧水頭症' },
+  { group:'disease', abbr:'USN',  full:'Unilateral Spatial Neglect', ja:'半側空間無視' },
+  { group:'disease', abbr:'HDS-R', full:'Hasegawa Dementia Scale-Revised', ja:'改訂長谷川式簡易知能評価スケール' },
+
+  // ===== 疾患・障害（神経系：脊髄・末梢・神経筋） =====
+  { group:'disease', abbr:'SCI',  full:'Spinal Cord Injury', ja:'脊髄損傷' },
+  { group:'disease', abbr:'ALS',  full:'Amyotrophic Lateral Sclerosis', ja:'筋萎縮性側索硬化症' },
+  { group:'disease', abbr:'SMA',  full:'Spinal Muscular Atrophy', ja:'脊髄性筋萎縮症' },
+  { group:'disease', abbr:'GBS',  full:'Guillain-Barré Syndrome', ja:'ギラン・バレー症候群' },
+  { group:'disease', abbr:'CIDP', full:'Chronic Inflammatory Demyelinating Polyneuropathy', ja:'慢性炎症性脱髄性多発神経炎' },
+  { group:'disease', abbr:'MG',   full:'Myasthenia Gravis', ja:'重症筋無力症' },
+  { group:'disease', abbr:'DMD',  full:'Duchenne Muscular Dystrophy', ja:'デュシェンヌ型筋ジストロフィー' },
+  { group:'disease', abbr:'MD',   full:'Muscular Dystrophy', ja:'筋ジストロフィー' },
+  { group:'disease', abbr:'CMT',  full:'Charcot-Marie-Tooth Disease', ja:'シャルコー・マリー・トゥース病' },
+  { group:'disease', abbr:'CTS',  full:'Carpal Tunnel Syndrome', ja:'手根管症候群' },
+  { group:'disease', abbr:'TOS',  full:'Thoracic Outlet Syndrome', ja:'胸郭出口症候群' },
+  { group:'disease', abbr:'CRPS', full:'Complex Regional Pain Syndrome', ja:'複合性局所疼痛症候群' },
+  { group:'disease', abbr:'DPN',  full:'Diabetic Peripheral Neuropathy', ja:'糖尿病性末梢神経障害' },
+
+  // ===== 疾患・障害（循環器） =====
+  { group:'disease', abbr:'MI',   full:'Myocardial Infarction', ja:'心筋梗塞' },
+  { group:'disease', abbr:'AMI',  full:'Acute Myocardial Infarction', ja:'急性心筋梗塞' },
+  { group:'disease', abbr:'IHD',  full:'Ischemic Heart Disease', ja:'虚血性心疾患' },
+  { group:'disease', abbr:'CAD',  full:'Coronary Artery Disease', ja:'冠動脈疾患' },
+  { group:'disease', abbr:'CHF',  full:'Congestive Heart Failure', ja:'うっ血性心不全' },
+  { group:'disease', abbr:'HF',   full:'Heart Failure', ja:'心不全' },
+  { group:'disease', abbr:'AP',   full:'Angina Pectoris', ja:'狭心症' },
+  { group:'disease', abbr:'AF / AFib', full:'Atrial Fibrillation', ja:'心房細動' },
+  { group:'disease', abbr:'HTN',  full:'Hypertension', ja:'高血圧症' },
+  { group:'disease', abbr:'AAA',  full:'Abdominal Aortic Aneurysm', ja:'腹部大動脈瘤' },
+  { group:'disease', abbr:'PAD',  full:'Peripheral Arterial Disease', ja:'末梢動脈疾患' },
+  { group:'disease', abbr:'ASO',  full:'Arteriosclerosis Obliterans', ja:'閉塞性動脈硬化症' },
+  { group:'disease', abbr:'DVT',  full:'Deep Vein Thrombosis', ja:'深部静脈血栓症' },
+  { group:'disease', abbr:'PE',   full:'Pulmonary Embolism', ja:'肺塞栓症' },
+  { group:'disease', abbr:'CABG', full:'Coronary Artery Bypass Grafting', ja:'冠動脈バイパス術' },
+  { group:'disease', abbr:'PCI',  full:'Percutaneous Coronary Intervention', ja:'経皮的冠動脈形成術' },
+
+  // ===== 疾患・障害（呼吸器） =====
+  { group:'disease', abbr:'COPD', full:'Chronic Obstructive Pulmonary Disease', ja:'慢性閉塞性肺疾患' },
+  { group:'disease', abbr:'IP',   full:'Interstitial Pneumonia', ja:'間質性肺炎' },
+  { group:'disease', abbr:'IPF',  full:'Idiopathic Pulmonary Fibrosis', ja:'特発性肺線維症' },
+  { group:'disease', abbr:'ARDS', full:'Acute Respiratory Distress Syndrome', ja:'急性呼吸窮迫症候群' },
+  { group:'disease', abbr:'AECOPD', full:'Acute Exacerbation of COPD', ja:'COPD急性増悪' },
+  { group:'disease', abbr:'PTE',  full:'Pulmonary Thromboembolism', ja:'肺血栓塞栓症' },
+  { group:'disease', abbr:'SAS',  full:'Sleep Apnea Syndrome', ja:'睡眠時無呼吸症候群' },
+  { group:'disease', abbr:'RF',   full:'Respiratory Failure', ja:'呼吸不全' },
+  { group:'disease', abbr:'HOT',  full:'Home Oxygen Therapy', ja:'在宅酸素療法' },
+  { group:'disease', abbr:'NPPV', full:'Non-invasive Positive Pressure Ventilation', ja:'非侵襲的陽圧換気' },
+
+  // ===== 疾患・障害（整形外科） =====
+  { group:'disease', abbr:'OA',   full:'Osteoarthritis', ja:'変形性関節症' },
+  { group:'disease', abbr:'KOA',  full:'Knee Osteoarthritis', ja:'変形性膝関節症' },
+  { group:'disease', abbr:'Hip OA', full:'Hip Osteoarthritis', ja:'変形性股関節症' },
+  { group:'disease', abbr:'RA',   full:'Rheumatoid Arthritis', ja:'関節リウマチ' },
+  { group:'disease', abbr:'OP',   full:'Osteoporosis', ja:'骨粗鬆症' },
+  { group:'disease', abbr:'LCS',  full:'Lumbar Canal Stenosis', ja:'腰部脊柱管狭窄症' },
+  { group:'disease', abbr:'LDH',  full:'Lumbar Disc Herniation', ja:'腰椎椎間板ヘルニア' },
+  { group:'disease', abbr:'CSM',  full:'Cervical Spondylotic Myelopathy', ja:'頸椎症性脊髄症' },
+  { group:'disease', abbr:'OPLL', full:'Ossification of Posterior Longitudinal Ligament', ja:'後縦靭帯骨化症' },
+  { group:'disease', abbr:'RCT',  full:'Rotator Cuff Tear', ja:'腱板断裂' },
+  { group:'disease', abbr:'FF',   full:'Femoral Fracture', ja:'大腿骨骨折' },
+  { group:'disease', abbr:'FNF',  full:'Femoral Neck Fracture', ja:'大腿骨頸部骨折' },
+  { group:'disease', abbr:'VCF',  full:'Vertebral Compression Fracture', ja:'椎体圧迫骨折' },
+  { group:'disease', abbr:'DDH',  full:'Developmental Dysplasia of the Hip', ja:'発育性股関節形成不全' },
+  { group:'disease', abbr:'AVN / ONFH', full:'Avascular Necrosis / Osteonecrosis of Femoral Head', ja:'大腿骨頭壊死' },
+  { group:'disease', abbr:'DISH', full:'Diffuse Idiopathic Skeletal Hyperostosis', ja:'びまん性特発性骨増殖症' },
+
+  // ===== 疾患・障害（代謝・内部・その他） =====
+  { group:'disease', abbr:'DM',   full:'Diabetes Mellitus', ja:'糖尿病' },
+  { group:'disease', abbr:'T2DM', full:'Type 2 Diabetes Mellitus', ja:'2型糖尿病' },
+  { group:'disease', abbr:'CKD',  full:'Chronic Kidney Disease', ja:'慢性腎臓病' },
+  { group:'disease', abbr:'ESRD', full:'End-Stage Renal Disease', ja:'末期腎不全' },
+  { group:'disease', abbr:'CLD',  full:'Chronic Liver Disease', ja:'慢性肝疾患' },
+  { group:'disease', abbr:'MetS', full:'Metabolic Syndrome', ja:'メタボリックシンドローム' },
+  { group:'disease', abbr:'DKD',  full:'Diabetic Kidney Disease', ja:'糖尿病性腎症' },
+  { group:'disease', abbr:'CVD',  full:'Cardiovascular Disease', ja:'心血管疾患' },
+  { group:'disease', abbr:'LC',   full:'Lung Cancer', ja:'肺癌' },
+  { group:'disease', abbr:'Ca',   full:'Cancer / Carcinoma', ja:'癌' },
+  { group:'disease', abbr:'CIN',  full:'Chemotherapy-Induced Neuropathy', ja:'化学療法誘発性末梢神経障害' },
+  { group:'disease', abbr:'GMFCS', full:'Gross Motor Function Classification System', ja:'粗大運動能力分類システム（脳性麻痺）' },
+  { group:'disease', abbr:'ID',   full:'Intellectual Disability', ja:'知的障害' },
+  { group:'disease', abbr:'ASD',  full:'Autism Spectrum Disorder', ja:'自閉スペクトラム症' },
+  { group:'disease', abbr:'ROP',  full:'Retinopathy of Prematurity', ja:'未熟児網膜症' },
+  { group:'disease', abbr:'Frailty', full:'Frailty', ja:'フレイル（虚弱）' },
+  { group:'disease', abbr:'Sarcopenia', full:'Sarcopenia', ja:'サルコペニア（筋減弱症）' },
+  { group:'disease', abbr:'GMFM', full:'Gross Motor Function Measure', ja:'粗大運動能力尺度' },
+];
+
+const GROUP_LABELS = {
+  bone:'骨・ランドマーク', ligament:'靭帯・軟部組織', muscle:'筋',
+  nerve:'神経・血管', joint:'関節・部位', motion:'運動・肢位',
+  test:'検査・テスト', disease:'疾患・障害', other:'評価・その他'
+};
+const GROUP_BADGE = {
+  bone:'b-bone', ligament:'b-ligament', muscle:'b-muscle', nerve:'b-nerve',
+  joint:'b-joint', motion:'b-motion', test:'b-test', disease:'b-disease', other:'b-other'
+};
+const GROUP_KEYS = ['all','bone','ligament','muscle','nerve','joint','motion','test','disease','other'];
+
+const QUIZ_TYPES = [
+  { label:'略語→正式名称', q: d=>`「${d.abbr}」の正式名称（英語）は？`, ans: d=>d.full },
+  { label:'略語→日本語',   q: d=>`「${d.abbr}」を日本語で言うと？`,     ans: d=>d.ja },
+  { label:'日本語→略語',   q: d=>`「${d.ja}」の略語は？`,               ans: d=>d.abbr },
+];
+
+let currentGroup='all', currentMode='table', searchTerm='';
+let quizData=[], quizIndex=0, score=0, answered=false;
+
+function getFiltered() {
+  return DATA.filter(d => {
+    const gOk = currentGroup==='all' || d.group===currentGroup;
+    const sOk = !searchTerm || [d.abbr,d.full,d.ja].some(v=>v.toLowerCase().includes(searchTerm.toLowerCase()));
+    return gOk && sOk;
+  });
+}
+
+function renderTable() {
+  const list = getFiltered();
+  document.getElementById('countLabel').textContent = `${list.length} 件`;
+  const tbody = document.getElementById('tableBody');
+  if (!list.length) { tbody.innerHTML='<tr><td colspan="4"><div class="empty-state">該当する略語がありません</div></td></tr>'; return; }
+  tbody.innerHTML = list.map(d => {
+    const badgeCls = GROUP_BADGE[d.group] || 'b-other';
+    const label = currentGroup==='all' ? GROUP_LABELS[d.group] : '';
+    return `<tr>
+      <td class="abbr-cell">${d.abbr}</td>
+      <td>${label ? `<span class="badge ${badgeCls}">${label}</span>` : ''}</td>
+      <td class="full-cell">${d.full}</td>
+      <td class="ja-cell">${d.ja}</td>
+    </tr>`;
+  }).join('');
+}
+
+function setGroup(g) {
+  currentGroup = g;
+  document.querySelectorAll('.tab').forEach((t,i) => t.classList.toggle('active', GROUP_KEYS[i]===g));
+  currentMode==='table' ? renderTable() : (buildQuiz(), renderQuiz());
+}
+
+function setMode(m) {
+  currentMode = m;
+  document.getElementById('tableView').style.display = m==='table' ? '' : 'none';
+  document.getElementById('quizView').style.display  = m==='quiz'  ? '' : 'none';
+  document.getElementById('btnTable').classList.toggle('active', m==='table');
+  document.getElementById('btnQuiz').classList.toggle('active',  m==='quiz');
+  m==='table' ? renderTable() : (buildQuiz(), renderQuiz());
+}
+
+function onSearch() {
+  searchTerm = document.getElementById('searchInput').value;
+  renderTable();
+}
+
+function shuffle(a) { return [...a].sort(()=>Math.random()-0.5); }
+
+function buildQuiz() {
+  const list = getFiltered();
+  if (!list.length) { quizData=[]; return; }
+  quizData = shuffle(list).slice(0, Math.min(list.length, 20)).map(d => {
+    const type = QUIZ_TYPES[Math.floor(Math.random()*QUIZ_TYPES.length)];
+    const correct = type.ans(d);
+    const pool = list.filter(x => type.ans(x) !== correct);
+    const distractors = shuffle(pool).slice(0,3).map(x => type.ans(x));
+    while (distractors.length < 3) distractors.push('—');
+    return {
+      type: type.label,
+      question: type.q(d),
+      correct,
+      opts: shuffle([correct, ...distractors]),
+      hint: `略語: ${d.abbr}　正式名称: ${d.full}　日本語: ${d.ja}`
+    };
+  });
+  quizIndex=0; score=0; answered=false;
+}
+
+function renderQuiz() {
+  const total = quizData.length;
+  document.getElementById('progressFill').style.width = total ? `${(quizIndex/total)*100}%` : '0%';
+  document.getElementById('quizCounter').textContent  = total ? `${quizIndex+1} / ${total}` : '—';
+  document.getElementById('quizMode').textContent     = currentGroup==='all' ? 'すべて' : (GROUP_LABELS[currentGroup]||'');
+  document.getElementById('scoreNum').textContent     = score;
+  document.getElementById('scoreDen').textContent     = quizIndex;
+  document.getElementById('nextBtn').disabled         = true;
+  answered = false;
+  const content = document.getElementById('quizContent');
+  if (!quizData.length) {
+    content.innerHTML = '<div class="result-card"><p style="color:var(--text-muted)">対象の略語がありません。</p></div>';
+    return;
+  }
+  const q = quizData[quizIndex];
+  content.innerHTML = `
+    <div class="quiz-card">
+      <span class="quiz-tag" style="background:var(--accent-bg);color:var(--accent-text);">${q.type}</span>
+      <div class="quiz-q">${q.question}</div>
+      <div class="options-grid">
+        ${q.opts.map((o,i)=>`<button class="option-btn" id="opt${i}" onclick="answer(${i})">${o}</button>`).join('')}
+      </div>
+      <div class="hint-box" id="hintBox"><span class="hint-abbr">${quizData[quizIndex]?.abbr ?? ''}</span><br>${q.hint}</div>
+    </div>`;
+}
+
+function answer(i) {
+  if (answered) return;
+  answered = true;
+  const q = quizData[quizIndex];
+  for (let j=0; j<q.opts.length; j++) {
+    const el = document.getElementById(`opt${j}`);
+    el.disabled = true;
+    if (q.opts[j]===q.correct) el.classList.add('correct');
+    else if (j===i) el.classList.add('wrong');
+  }
+  if (q.opts[i]===q.correct) score++;
+  document.getElementById('hintBox').style.display = 'block';
+  document.getElementById('nextBtn').disabled = false;
+  document.getElementById('scoreNum').textContent = score;
+  document.getElementById('scoreDen').textContent = quizIndex+1;
+}
+
+function nextQuiz() {
+  quizIndex++;
+  const total = quizData.length;
+  if (quizIndex >= total) {
+    document.getElementById('progressFill').style.width = '100%';
+    document.getElementById('nextBtn').disabled = true;
+    document.getElementById('scoreNum').textContent = score;
+    document.getElementById('scoreDen').textContent = total;
+    const pct = Math.round(score/total*100);
+    const msg = pct>=80 ? '🎉 すばらしい！' : pct>=60 ? '📚 もう一息！' : '💪 繰り返し挑戦しよう。';
+    document.getElementById('quizContent').innerHTML = `
+      <div class="result-card">
+        <div class="result-score">${score}</div>
+        <div class="result-label">/ ${total} 問正解</div>
+        <div class="result-pct">${pct}%</div>
+        <div class="result-msg">${msg}</div>
+        <button class="btn btn-primary" onclick="restartQuiz()" style="font-size:14px;padding:10px 24px;">もう一度チャレンジ</button>
+      </div>`;
+    return;
+  }
+  renderQuiz();
+}
+
+function restartQuiz() { buildQuiz(); renderQuiz(); }
+
+renderTable();
+</script>
+</body>
+</html>
