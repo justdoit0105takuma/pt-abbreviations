@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>上肢筋 解剖学習ツール</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f4f2f7;
+  --surface: #ffffff;
+  --surface2: #eeeaf4;
+  --border: #dcd7ea;
+  --text: #1a1820;
+  --text-muted: #726a88;
+  --text-faint: #aaa4bc;
+  --accent: #5a3a9a;
+  --accent-bg: #ede8fa;
+  --accent-text: #3a2070;
+  --green: #2a7a4b;
+  --green-bg: #e8f5ee;
+  --green-text: #1a5530;
+  --amber: #8a5a00;
+  --amber-bg: #fdf4e0;
+  --amber-text: #5c3c00;
+  --coral: #9a3a1a;
+  --coral-bg: #fdf0eb;
+  --coral-text: #6b2510;
+  --purple: #5a3a8a;
+  --purple-bg: #f0ebfa;
+  --purple-text: #3a2060;
+  --teal: #1a6a5a;
+  --teal-bg: #e5f5f0;
+  --teal-text: #0f4a3a;
+  --blue: #2d5a8e;
+  --blue-bg: #e8f0f9;
+  --blue-text: #1a3f6b;
+  --radius: 8px;
+  --radius-lg: 12px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Noto Sans JP', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; font-size: 14px; line-height: 1.6; }
+header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 1rem 1.5rem; position: sticky; top: 0; z-index: 100; }
+.header-inner { max-width: 980px; margin: 0 auto; display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
+.header-title { font-size: 15px; font-weight: 700; color: var(--text); letter-spacing: -0.01em; }
+.header-sub { font-size: 11px; color: var(--text-muted); font-family: 'DM Mono', monospace; }
+.main { max-width: 980px; margin: 0 auto; padding: 1.25rem 1rem; }
+.controls { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 1.25rem; }
+.tab-group { display: flex; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; flex-wrap: wrap; }
+.tab { padding: 7px 12px; font-size: 12.5px; font-family: 'Noto Sans JP', sans-serif; border: none; background: transparent; color: var(--text-muted); cursor: pointer; border-right: 1px solid var(--border); transition: all 0.15s; white-space: nowrap; }
+.tab:last-child { border-right: none; }
+.tab.active { background: var(--accent); color: #fff; font-weight: 500; }
+.tab:hover:not(.active) { background: var(--surface2); }
+.search-wrap { flex: 1; min-width: 180px; position: relative; }
+.search-wrap input { width: 100%; padding: 7px 12px 7px 32px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); color: var(--text); font-size: 13px; font-family: 'Noto Sans JP', sans-serif; outline: none; transition: border-color 0.15s; }
+.search-wrap input:focus { border-color: var(--accent); }
+.search-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--text-faint); font-size: 14px; pointer-events: none; }
+.mode-group { display: flex; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+.mode-btn { padding: 7px 14px; font-size: 12.5px; font-family: 'Noto Sans JP', sans-serif; border: none; border-right: 1px solid var(--border); background: transparent; color: var(--text-muted); cursor: pointer; transition: all 0.15s; }
+.mode-btn:last-child { border-right: none; }
+.mode-btn.active { background: var(--green); color: #fff; font-weight: 500; }
+.mode-btn:hover:not(.active) { background: var(--surface2); }
+.table-wrap { overflow-x: auto; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); }
+table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+th { background: var(--surface2); color: var(--text-muted); font-weight: 500; font-size: 11px; text-transform: uppercase; letter-spacing: 0.06em; padding: 9px 12px; text-align: left; border-bottom: 1px solid var(--border); white-space: nowrap; }
+td { padding: 10px 12px; border-bottom: 1px solid var(--border); color: var(--text); vertical-align: top; line-height: 1.55; }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: var(--surface2); }
+.muscle-name { font-weight: 700; font-size: 13px; }
+.badge { display: inline-block; padding: 2px 8px; border-radius: 99px; font-size: 11px; margin: 1px 2px 1px 0; white-space: nowrap; }
+.b-blue   { background: var(--blue-bg);   color: var(--blue-text); }
+.b-teal   { background: var(--teal-bg);   color: var(--teal-text); }
+.b-amber  { background: var(--amber-bg);  color: var(--amber-text); }
+.b-coral  { background: var(--coral-bg);  color: var(--coral-text); }
+.b-purple { background: var(--purple-bg); color: var(--purple-text); }
+.b-green  { background: var(--green-bg);  color: var(--green-text); }
+.b-seg    { background: var(--surface2);  color: var(--text-muted); font-family: 'DM Mono', monospace; font-size: 11px; }
+.action-text { color: var(--text-muted); font-size: 12px; }
+.quiz-wrap { display: flex; flex-direction: column; gap: 1rem; }
+.quiz-progress-bar { height: 4px; background: var(--border); border-radius: 99px; overflow: hidden; margin-bottom: 0.25rem; }
+.quiz-progress-fill { height: 100%; background: var(--accent); border-radius: 99px; transition: width 0.3s ease; }
+.quiz-meta { display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: var(--text-muted); margin-bottom: 0.5rem; }
+.quiz-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 1.5rem; }
+.quiz-q { font-size: 16px; font-weight: 700; color: var(--text); margin-bottom: 1.25rem; line-height: 1.5; }
+.quiz-muscle-tag { display: inline-block; background: var(--accent-bg); color: var(--accent-text); font-size: 11px; padding: 2px 8px; border-radius: 4px; margin-bottom: 0.75rem; font-family: 'DM Mono', monospace; }
+.options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+@media (max-width: 500px) { .options-grid { grid-template-columns: 1fr; } }
+.option-btn { padding: 11px 14px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); color: var(--text); font-size: 12.5px; font-family: 'Noto Sans JP', sans-serif; cursor: pointer; text-align: left; line-height: 1.5; transition: all 0.15s; }
+.option-btn:hover:not(:disabled) { background: var(--surface2); border-color: var(--accent); }
+.option-btn.correct { background: var(--green-bg); border-color: var(--green); color: var(--green-text); font-weight: 500; }
+.option-btn.wrong   { background: var(--coral-bg); border-color: var(--coral); color: var(--coral-text); }
+.option-btn:disabled { cursor: default; }
+.hint-box { margin-top: 1rem; background: var(--surface2); border-radius: var(--radius); padding: 10px 14px; font-size: 12px; color: var(--text-muted); line-height: 1.7; display: none; border-left: 3px solid var(--accent); }
+.hint-label { font-weight: 700; color: var(--accent); font-size: 11px; letter-spacing: 0.05em; display: block; margin-bottom: 4px; }
+.quiz-nav { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
+.score-display { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--text-muted); }
+.score-num { font-size: 18px; font-weight: 700; color: var(--text); font-family: 'DM Mono', monospace; }
+.btn { padding: 8px 18px; border-radius: var(--radius); border: 1px solid var(--border); background: var(--surface); color: var(--text); font-size: 13px; font-family: 'Noto Sans JP', sans-serif; cursor: pointer; transition: all 0.15s; }
+.btn:hover:not(:disabled) { background: var(--surface2); }
+.btn:disabled { opacity: 0.4; cursor: default; }
+.btn-primary { background: var(--accent); color: #fff; border-color: transparent; font-weight: 500; }
+.btn-primary:hover:not(:disabled) { background: var(--accent-text); }
+.result-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 2rem; text-align: center; }
+.result-score { font-size: 48px; font-weight: 700; font-family: 'DM Mono', monospace; color: var(--accent); line-height: 1; }
+.result-label { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
+.result-pct { font-size: 22px; font-weight: 700; margin-top: 8px; }
+.result-msg { font-size: 14px; color: var(--text-muted); margin-top: 12px; margin-bottom: 1.5rem; }
+.empty-state { text-align: center; padding: 3rem 1rem; color: var(--text-muted); font-size: 14px; }
+</style>
+</head>
+<body>
+<header>
+  <div class="header-inner">
+    <div>
+      <div class="header-title">上肢筋 解剖学習ツール</div>
+      <div class="header-sub">起始 / 停止 / 神経 / 髄節</div>
+    </div>
+  </div>
+</header>
+<div class="main">
+  <div class="controls">
+    <div class="tab-group" id="tabGroup">
+      <button class="tab active" onclick="setGroup('all')">すべて</button>
+      <button class="tab" onclick="setGroup('upper_arm')">上腕</button>
+      <button class="tab" onclick="setGroup('forearm_flex')">前腕（屈側）</button>
+      <button class="tab" onclick="setGroup('forearm_ext')">前腕（伸側）</button>
+      <button class="tab" onclick="setGroup('hand')">手内在筋</button>
+    </div>
+    <div class="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="searchInput" placeholder="筋名・神経・髄節で絞り込み…" oninput="onSearch()">
+    </div>
+    <div class="mode-group">
+      <button class="mode-btn active" id="btnTable" onclick="setMode('table')">一覧</button>
+      <button class="mode-btn" id="btnQuiz" onclick="setMode('quiz')">クイズ</button>
+    </div>
+  </div>
+  <div id="tableView">
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th style="min-width:110px">筋名</th>
+            <th style="min-width:160px">起始</th>
+            <th style="min-width:140px">停止</th>
+            <th style="min-width:160px">神経</th>
+            <th style="min-width:60px">髄節</th>
+            <th style="min-width:130px">主な作用</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+    </div>
+  </div>
+  <div id="quizView" style="display:none">
+    <div class="quiz-wrap">
+      <div>
+        <div class="quiz-progress-bar"><div class="quiz-progress-fill" id="progressFill" style="width:0%"></div></div>
+        <div class="quiz-meta"><span id="quizCounter">1 / 20</span><span id="quizGroupLabel"></span></div>
+      </div>
+      <div id="quizContent"></div>
+      <div class="quiz-nav">
+        <div class="score-display"><span class="score-num" id="scoreNum">0</span><span>/ <span id="scoreDen">0</span> 正解</span></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="btn" onclick="restartQuiz()">最初から</button>
+          <button class="btn btn-primary" id="nextBtn" onclick="nextQuiz()" disabled>次へ →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+const MUSCLES = [
+  // 上腕
+  { group:'upper_arm', name:'上腕二頭筋（長頭）', origin:'関節上結節（肩甲骨）', insert:'橈骨粗面・前腕筋膜', nerve:'筋皮神経', seg:'C5-6', action:'肘関節屈曲・前腕回外・肩関節屈曲' },
+  { group:'upper_arm', name:'上腕二頭筋（短頭）', origin:'烏口突起', insert:'橈骨粗面・前腕筋膜', nerve:'筋皮神経', seg:'C5-6', action:'肘関節屈曲・前腕回外・肩関節屈曲' },
+  { group:'upper_arm', name:'上腕筋', origin:'上腕骨前面下部', insert:'尺骨粗面・鉤状突起', nerve:'筋皮神経（＋橈骨神経一部）', seg:'C5-6', action:'肘関節屈曲（主力筋）' },
+  { group:'upper_arm', name:'烏口腕筋', origin:'烏口突起', insert:'上腕骨内側面中部', nerve:'筋皮神経', seg:'C6-7', action:'肩関節屈曲・内転' },
+  { group:'upper_arm', name:'上腕三頭筋（長頭）', origin:'関節下結節（肩甲骨）', insert:'肘頭', nerve:'橈骨神経', seg:'C6-8', action:'肘関節伸展・肩関節伸展・内転' },
+  { group:'upper_arm', name:'上腕三頭筋（外側頭）', origin:'上腕骨後面（橈骨神経溝上方）', insert:'肘頭', nerve:'橈骨神経', seg:'C6-8', action:'肘関節伸展' },
+  { group:'upper_arm', name:'上腕三頭筋（内側頭）', origin:'上腕骨後面（橈骨神経溝下方）', insert:'肘頭', nerve:'橈骨神経', seg:'C6-8', action:'肘関節伸展（主力）' },
+  { group:'upper_arm', name:'肘筋', origin:'上腕骨外側上顆', insert:'肘頭・尺骨後面近位', nerve:'橈骨神経', seg:'C7-8', action:'肘関節伸展補助' },
+  // 前腕屈側
+  { group:'forearm_flex', name:'円回内筋', origin:'上腕骨内側上顆・尺骨鉤状突起', insert:'橈骨外側面中部', nerve:'正中神経', seg:'C6-7', action:'前腕回内・肘関節屈曲補助' },
+  { group:'forearm_flex', name:'橈側手根屈筋', origin:'上腕骨内側上顆', insert:'第2・3中手骨底', nerve:'正中神経', seg:'C6-7', action:'手関節掌屈・橈屈' },
+  { group:'forearm_flex', name:'長掌筋', origin:'上腕骨内側上顆', insert:'掌腱膜', nerve:'正中神経', seg:'C7-8', action:'掌腱膜緊張・手関節掌屈補助' },
+  { group:'forearm_flex', name:'尺側手根屈筋', origin:'上腕骨内側上顆・尺骨後縁', insert:'豆状骨・第5中手骨', nerve:'尺骨神経', seg:'C7-T1', action:'手関節掌屈・尺屈' },
+  { group:'forearm_flex', name:'浅指屈筋', origin:'上腕骨内側上顆・橈骨前面・尺骨鉤状突起', insert:'第2-5中節骨（両側）', nerve:'正中神経', seg:'C7-T1', action:'PIP関節屈曲・手関節掌屈' },
+  { group:'forearm_flex', name:'深指屈筋', origin:'尺骨前面・骨間膜', insert:'第2-5末節骨', nerve:'正中神経（橈側2本）・尺骨神経（尺側2本）', seg:'C8-T1', action:'DIP関節屈曲' },
+  { group:'forearm_flex', name:'長母指屈筋', origin:'橈骨前面・骨間膜', insert:'母指末節骨', nerve:'正中神経（前骨間神経）', seg:'C8-T1', action:'母指IP関節屈曲' },
+  { group:'forearm_flex', name:'方形回内筋', origin:'尺骨前面遠位1/4', insert:'橈骨前面遠位1/4', nerve:'正中神経（前骨間神経）', seg:'C8-T1', action:'前腕回内（主力）' },
+  { group:'forearm_flex', name:'腕橈骨筋', origin:'上腕骨外側上顆稜', insert:'橈骨茎状突起', nerve:'橈骨神経', seg:'C5-6', action:'肘関節屈曲（回外位で主力）' },
+  // 前腕伸側
+  { group:'forearm_ext', name:'長橈側手根伸筋', origin:'上腕骨外側上顆稜', insert:'第2中手骨底', nerve:'橈骨神経', seg:'C6-7', action:'手関節背屈・橈屈' },
+  { group:'forearm_ext', name:'短橈側手根伸筋', origin:'上腕骨外側上顆', insert:'第3中手骨底', nerve:'橈骨神経（後骨間神経）', seg:'C7-8', action:'手関節背屈・橈屈' },
+  { group:'forearm_ext', name:'総指伸筋', origin:'上腕骨外側上顆', insert:'第2-5中節骨・末節骨（伸筋腱膜）', nerve:'橈骨神経（後骨間神経）', seg:'C7-8', action:'MP関節伸展・手関節背屈' },
+  { group:'forearm_ext', name:'小指伸筋', origin:'上腕骨外側上顆', insert:'小指伸筋腱膜', nerve:'橈骨神経（後骨間神経）', seg:'C7-8', action:'小指MP関節伸展' },
+  { group:'forearm_ext', name:'尺側手根伸筋', origin:'上腕骨外側上顆・尺骨後縁', insert:'第5中手骨底', nerve:'橈骨神経（後骨間神経）', seg:'C7-8', action:'手関節背屈・尺屈' },
+  { group:'forearm_ext', name:'回外筋', origin:'上腕骨外側上顆・尺骨回外筋稜', insert:'橈骨前面近位', nerve:'橈骨神経（後骨間神経）', seg:'C5-6', action:'前腕回外' },
+  { group:'forearm_ext', name:'長母指外転筋', origin:'橈尺骨後面・骨間膜', insert:'第1中手骨底', nerve:'橈骨神経（後骨間神経）', seg:'C7-8', action:'母指CMC関節外転・橈屈' },
+  { group:'forearm_ext', name:'短母指伸筋', origin:'橈骨後面・骨間膜', insert:'母指基節骨底', nerve:'橈骨神経（後骨間神経）', seg:'C7-8', action:'母指MP関節伸展・外転' },
+  { group:'forearm_ext', name:'長母指伸筋', origin:'尺骨後面・骨間膜', insert:'母指末節骨底', nerve:'橈骨神経（後骨間神経）', seg:'C7-8', action:'母指IP関節伸展' },
+  { group:'forearm_ext', name:'示指伸筋', origin:'尺骨後面・骨間膜', insert:'示指伸筋腱膜', nerve:'橈骨神経（後骨間神経）', seg:'C7-8', action:'示指MP関節伸展' },
+  // 手内在筋
+  { group:'hand', name:'短母指外転筋', origin:'屈筋支帯・舟状骨', insert:'母指基節骨（橈側）', nerve:'正中神経（反回枝）', seg:'C8-T1', action:'母指外転' },
+  { group:'hand', name:'短母指屈筋（浅頭）', origin:'屈筋支帯', insert:'母指基節骨（橈側種子骨）', nerve:'正中神経（反回枝）', seg:'C8-T1', action:'母指MP関節屈曲' },
+  { group:'hand', name:'短母指屈筋（深頭）', origin:'小菱形骨・第3中手骨', insert:'母指基節骨（橈側種子骨）', nerve:'尺骨神経（深枝）', seg:'C8-T1', action:'母指MP関節屈曲' },
+  { group:'hand', name:'母指対立筋', origin:'屈筋支帯・大菱形骨', insert:'第1中手骨橈側縁', nerve:'正中神経（反回枝）', seg:'C8-T1', action:'母指対立' },
+  { group:'hand', name:'母指内転筋', origin:'第3中手骨・有頭骨（横頭）・第2-3中手骨底（斜頭）', insert:'母指基節骨（尺側種子骨）', nerve:'尺骨神経（深枝）', seg:'C8-T1', action:'母指内転・MP関節屈曲' },
+  { group:'hand', name:'小指外転筋', origin:'豆状骨・屈筋支帯', insert:'小指基節骨（尺側）', nerve:'尺骨神経（深枝）', seg:'C8-T1', action:'小指外転' },
+  { group:'hand', name:'短小指屈筋', origin:'有鉤骨鉤・屈筋支帯', insert:'小指基節骨（尺側）', nerve:'尺骨神経（深枝）', seg:'C8-T1', action:'小指MP関節屈曲' },
+  { group:'hand', name:'小指対立筋', origin:'有鉤骨鉤・屈筋支帯', insert:'第5中手骨尺側縁', nerve:'尺骨神経（深枝）', seg:'C8-T1', action:'小指対立' },
+  { group:'hand', name:'虫様筋（第1・2）', origin:'深指屈筋腱（橈側2本）', insert:'第2・3指伸筋腱膜（橈側）', nerve:'正中神経', seg:'C8-T1', action:'MP関節屈曲・IP関節伸展' },
+  { group:'hand', name:'虫様筋（第3・4）', origin:'深指屈筋腱（尺側2本）', insert:'第4・5指伸筋腱膜（橈側）', nerve:'尺骨神経（深枝）', seg:'C8-T1', action:'MP関節屈曲・IP関節伸展' },
+  { group:'hand', name:'背側骨間筋（1-4）', origin:'隣接する中手骨の対向面（2頭）', insert:'基節骨・伸筋腱膜', nerve:'尺骨神経（深枝）', seg:'C8-T1', action:'指外転・MP関節屈曲・IP関節伸展' },
+  { group:'hand', name:'掌側骨間筋（1-3）', origin:'第2・4・5中手骨（単頭）', insert:'基節骨・伸筋腱膜', nerve:'尺骨神経（深枝）', seg:'C8-T1', action:'指内転・MP関節屈曲・IP関節伸展' },
+];
+
+const GROUP_LABELS = { upper_arm:'上腕', forearm_flex:'前腕（屈側）', forearm_ext:'前腕（伸側）', hand:'手内在筋' };
+const GROUP_COLORS = { upper_arm:'b-purple', forearm_flex:'b-blue', forearm_ext:'b-teal', hand:'b-amber' };
+const NERVE_MAP = [
+  ['筋皮神経','b-purple'],['正中神経','b-blue'],['尺骨神経','b-teal'],
+  ['橈骨神経','b-coral'],['前骨間神経','b-blue'],['後骨間神経','b-coral'],
+  ['反回枝','b-blue'],['深枝','b-teal'],
+];
+function nerveClass(n) {
+  for (const [k,c] of NERVE_MAP) { if (n.includes(k)) return c; }
+  return 'b-blue';
+}
+const QUIZ_TYPES = [
+  { label:'支配神経', q: m=>`「${m.name}」の支配神経は？`, ans: m=>m.nerve },
+  { label:'髄節',   q: m=>`「${m.name}」の髄節は？`,     ans: m=>m.seg },
+  { label:'起始',   q: m=>`「${m.name}」の起始部は？`,   ans: m=>m.origin },
+  { label:'停止',   q: m=>`「${m.name}」の停止部は？`,   ans: m=>m.insert },
+];
+let currentGroup='all', currentMode='table', searchTerm='';
+let quizData=[], quizIndex=0, score=0, answered=false;
+function getFiltered() {
+  return MUSCLES.filter(m => {
+    const gOk = currentGroup==='all' || m.group===currentGroup;
+    const sOk = !searchTerm || [m.name,m.nerve,m.seg,m.origin,m.insert,m.action].some(v=>v.toLowerCase().includes(searchTerm.toLowerCase()));
+    return gOk && sOk;
+  });
+}
+function renderTable() {
+  const list = getFiltered();
+  const tbody = document.getElementById('tableBody');
+  if (!list.length) { tbody.innerHTML='<tr><td colspan="6"><div class="empty-state">該当する筋がありません</div></td></tr>'; return; }
+  tbody.innerHTML = list.map(m => {
+    const nerves = m.nerve.split('＋').map(n=>`<span class="badge ${nerveClass(n.trim())}">${n.trim()}</span>`).join('');
+    const gTag = currentGroup==='all' ? `<div><span class="badge ${GROUP_COLORS[m.group]}" style="margin-top:4px;font-size:9px;">${GROUP_LABELS[m.group]}</span></div>` : '';
+    return `<tr><td><div class="muscle-name">${m.name}</div>${gTag}</td><td>${m.origin}</td><td>${m.insert}</td><td>${nerves}</td><td><span class="badge b-seg">${m.seg}</span></td><td class="action-text">${m.action}</td></tr>`;
+  }).join('');
+}
+function setGroup(g) {
+  currentGroup=g;
+  const keys=['all','upper_arm','forearm_flex','forearm_ext','hand'];
+  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('active',keys[i]===g));
+  currentMode==='table' ? renderTable() : (buildQuiz(), renderQuiz());
+}
+function setMode(m) {
+  currentMode=m;
+  document.getElementById('tableView').style.display=m==='table'?'':'none';
+  document.getElementById('quizView').style.display=m==='quiz'?'':'none';
+  document.getElementById('btnTable').classList.toggle('active',m==='table');
+  document.getElementById('btnQuiz').classList.toggle('active',m==='quiz');
+  m==='table' ? renderTable() : (buildQuiz(), renderQuiz());
+}
+function onSearch() { searchTerm=document.getElementById('searchInput').value; renderTable(); }
+function shuffle(a) { return [...a].sort(()=>Math.random()-0.5); }
+function buildQuiz() {
+  const list=getFiltered();
+  if (!list.length) { quizData=[]; return; }
+  quizData=shuffle(list).slice(0,Math.min(list.length,20)).map(m=>{
+    const type=QUIZ_TYPES[Math.floor(Math.random()*QUIZ_TYPES.length)];
+    const correct=type.ans(m);
+    const pool=list.filter(x=>type.ans(x)!==correct);
+    const distractors=shuffle(pool).slice(0,3).map(x=>type.ans(x));
+    while(distractors.length<3) distractors.push('—');
+    return { type:type.label, question:type.q(m), correct, opts:shuffle([correct,...distractors]), hint:`起始：${m.origin}　停止：${m.insert}　神経：${m.nerve}　髄節：${m.seg}` };
+  });
+  quizIndex=0; score=0; answered=false;
+}
+function renderQuiz() {
+  const total=quizData.length;
+  document.getElementById('progressFill').style.width=total?`${(quizIndex/total)*100}%`:'0%';
+  document.getElementById('quizCounter').textContent=total?`${quizIndex+1} / ${total}`:'—';
+  document.getElementById('quizGroupLabel').textContent=currentGroup==='all'?'すべて':(GROUP_LABELS[currentGroup]||'');
+  document.getElementById('scoreNum').textContent=score;
+  document.getElementById('scoreDen').textContent=quizIndex;
+  document.getElementById('nextBtn').disabled=true;
+  answered=false;
+  const content=document.getElementById('quizContent');
+  if (!quizData.length) { content.innerHTML='<div class="result-card"><p style="color:var(--text-muted)">対象の筋がありません。グループを変更してください。</p></div>'; return; }
+  const q=quizData[quizIndex];
+  content.innerHTML=`<div class="quiz-card"><span class="quiz-muscle-tag">${q.type}</span><div class="quiz-q">${q.question}</div><div class="options-grid" id="optsGrid">${q.opts.map((o,i)=>`<button class="option-btn" id="opt${i}" onclick="answer(${i})">${o}</button>`).join('')}</div><div class="hint-box" id="hintBox"><span class="hint-label">全情報</span>${q.hint}</div></div>`;
+}
+function answer(i) {
+  if (answered) return;
+  answered=true;
+  const q=quizData[quizIndex];
+  for (let j=0;j<q.opts.length;j++) {
+    const el=document.getElementById(`opt${j}`);
+    el.disabled=true;
+    if (q.opts[j]===q.correct) el.classList.add('correct');
+    else if (j===i) el.classList.add('wrong');
+  }
+  if (q.opts[i]===q.correct) score++;
+  document.getElementById('hintBox').style.display='block';
+  document.getElementById('nextBtn').disabled=false;
+  document.getElementById('scoreNum').textContent=score;
+  document.getElementById('scoreDen').textContent=quizIndex+1;
+}
+function nextQuiz() {
+  quizIndex++;
+  const total=quizData.length;
+  if (quizIndex>=total) {
+    document.getElementById('progressFill').style.width='100%';
+    document.getElementById('nextBtn').disabled=true;
+    document.getElementById('scoreNum').textContent=score;
+    document.getElementById('scoreDen').textContent=total;
+    const pct=Math.round(score/total*100);
+    const msg=pct>=80?'🎉 すばらしい！':pct>=60?'📚 もう一息！':'💪 繰り返し挑戦しよう。';
+    document.getElementById('quizContent').innerHTML=`<div class="result-card"><div class="result-score">${score}</div><div class="result-label">/ ${total} 問正解</div><div class="result-pct">${pct}%</div><div class="result-msg">${msg}</div><button class="btn btn-primary" onclick="restartQuiz()" style="font-size:14px;padding:10px 24px;">もう一度チャレンジ</button></div>`;
+    return;
+  }
+  renderQuiz();
+}
+function restartQuiz() { buildQuiz(); renderQuiz(); }
+renderTable();
+</script>
+</body>
+</html>

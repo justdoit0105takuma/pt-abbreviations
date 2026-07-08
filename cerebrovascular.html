@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>脳血管障害 学習ツール</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f4f2f4;
+  --surface: #ffffff;
+  --surface2: #ede9ee;
+  --border: #ddd5df;
+  --text: #1a171c;
+  --text-muted: #756b7a;
+  --text-faint: #aaa0b0;
+  --accent: #7a2a5a;
+  --accent-bg: #f5e6ef;
+  --accent-text: #56153c;
+  --green: #2a7a4b;
+  --green-bg: #e8f5ee;
+  --green-text: #1a5530;
+  --amber: #8a5a00;
+  --amber-bg: #fdf4e0;
+  --amber-text: #5c3c00;
+  --coral: #9a3a1a;
+  --coral-bg: #fdf0eb;
+  --coral-text: #6b2510;
+  --purple: #5a3a8a;
+  --purple-bg: #f0ebfa;
+  --purple-text: #3a2060;
+  --teal: #1a6a5a;
+  --teal-bg: #e5f5f0;
+  --teal-text: #0f4a3a;
+  --blue: #2d5a8e;
+  --blue-bg: #e8f0f9;
+  --blue-text: #1a3f6b;
+  --radius: 8px;
+  --radius-lg: 12px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Noto Sans JP', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; font-size: 14px; line-height: 1.6; }
+header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 1rem 1.5rem; position: sticky; top: 0; z-index: 100; }
+.header-inner { max-width: 1000px; margin: 0 auto; }
+.header-title { font-size: 15px; font-weight: 700; }
+.header-sub { font-size: 11px; color: var(--text-muted); font-family: 'DM Mono', monospace; }
+.main { max-width: 1000px; margin: 0 auto; padding: 1.25rem 1rem; }
+.section-tabs { display: flex; gap: 6px; margin-bottom: 1.25rem; flex-wrap: wrap; }
+.section-tab { padding: 8px 15px; border-radius: var(--radius); border: 1px solid var(--border); background: var(--surface); color: var(--text-muted); cursor: pointer; font-size: 13px; font-family: 'Noto Sans JP', sans-serif; transition: all 0.15s; font-weight: 500; }
+.section-tab.active { background: var(--accent); color: #fff; border-color: transparent; }
+.section-tab:hover:not(.active) { background: var(--surface2); }
+.controls { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 1rem; }
+.search-wrap { flex: 1; min-width: 180px; position: relative; }
+.search-wrap input { width: 100%; padding: 7px 12px 7px 32px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); color: var(--text); font-size: 13px; font-family: 'Noto Sans JP', sans-serif; outline: none; }
+.search-wrap input:focus { border-color: var(--accent); }
+.search-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--text-faint); font-size: 14px; pointer-events: none; }
+.mode-group { display: flex; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+.mode-btn { padding: 7px 14px; font-size: 12.5px; font-family: 'Noto Sans JP', sans-serif; border: none; border-right: 1px solid var(--border); background: transparent; color: var(--text-muted); cursor: pointer; }
+.mode-btn:last-child { border-right: none; }
+.mode-btn.active { background: var(--green); color: #fff; font-weight: 500; }
+.count-label { font-size: 12px; color: var(--text-muted); white-space: nowrap; }
+.section-desc { font-size: 12.5px; color: var(--text-muted); margin-bottom: 1rem; background: var(--surface2); padding: 10px 14px; border-radius: var(--radius); border-left: 3px solid var(--accent); }
+.table-wrap { overflow-x: auto; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); }
+table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+th { background: var(--surface2); color: var(--text-muted); font-weight: 500; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; padding: 9px 12px; text-align: left; border-bottom: 1px solid var(--border); white-space: nowrap; }
+td { padding: 10px 12px; border-bottom: 1px solid var(--border); color: var(--text); vertical-align: top; line-height: 1.55; }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: var(--surface2); }
+.primary-cell { font-weight: 700; font-size: 13px; }
+.mono { font-family: 'DM Mono', monospace; font-weight: 700; }
+.sub-cell { color: var(--text-muted); font-size: 12px; }
+.badge { display: inline-block; padding: 2px 8px; border-radius: 99px; font-size: 10.5px; margin: 1px 2px 1px 0; white-space: nowrap; font-weight: 500; }
+.b-blue{background:var(--blue-bg);color:var(--blue-text);} .b-teal{background:var(--teal-bg);color:var(--teal-text);}
+.b-amber{background:var(--amber-bg);color:var(--amber-text);} .b-coral{background:var(--coral-bg);color:var(--coral-text);}
+.b-purple{background:var(--purple-bg);color:var(--purple-text);} .b-green{background:var(--green-bg);color:var(--green-text);}
+.b-accent{background:var(--accent-bg);color:var(--accent-text);}
+/* QUIZ */
+.quiz-wrap { display: flex; flex-direction: column; gap: 1rem; }
+.quiz-progress-bar { height: 4px; background: var(--border); border-radius: 99px; overflow: hidden; }
+.quiz-progress-fill { height: 100%; background: var(--accent); border-radius: 99px; transition: width 0.3s; }
+.quiz-meta { display: flex; justify-content: space-between; font-size: 12px; color: var(--text-muted); margin: 0.25rem 0 0.5rem; }
+.quiz-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 1.5rem; }
+.quiz-q { font-size: 16px; font-weight: 700; margin-bottom: 1.25rem; line-height: 1.5; }
+.quiz-tag { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 4px; margin-bottom: 0.75rem; font-family: 'DM Mono', monospace; background: var(--accent-bg); color: var(--accent-text); }
+.options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+@media (max-width: 560px) { .options-grid { grid-template-columns: 1fr; } }
+.option-btn { padding: 11px 14px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); color: var(--text); font-size: 12.5px; font-family: 'Noto Sans JP', sans-serif; cursor: pointer; text-align: left; line-height: 1.5; transition: all 0.15s; }
+.option-btn:hover:not(:disabled) { background: var(--surface2); border-color: var(--accent); }
+.option-btn.correct { background: var(--green-bg); border-color: var(--green); color: var(--green-text); font-weight: 500; }
+.option-btn.wrong { background: var(--coral-bg); border-color: var(--coral); color: var(--coral-text); }
+.option-btn:disabled { cursor: default; }
+.hint-box { margin-top: 1rem; background: var(--surface2); border-radius: var(--radius); padding: 10px 14px; font-size: 12.5px; color: var(--text-muted); line-height: 1.8; display: none; border-left: 3px solid var(--accent); }
+.hint-label { font-weight: 700; color: var(--accent); font-size: 11px; letter-spacing: 0.05em; display: block; margin-bottom: 4px; }
+.quiz-nav { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
+.score-display { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--text-muted); }
+.score-num { font-size: 18px; font-weight: 700; color: var(--text); font-family: 'DM Mono', monospace; }
+.btn { padding: 8px 18px; border-radius: var(--radius); border: 1px solid var(--border); background: var(--surface); color: var(--text); font-size: 13px; font-family: 'Noto Sans JP', sans-serif; cursor: pointer; }
+.btn:hover:not(:disabled) { background: var(--surface2); }
+.btn:disabled { opacity: 0.4; cursor: default; }
+.btn-primary { background: var(--accent); color: #fff; border-color: transparent; font-weight: 500; }
+.result-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 2rem; text-align: center; }
+.result-score { font-size: 52px; font-weight: 700; font-family: 'DM Mono', monospace; color: var(--accent); line-height: 1; }
+.result-label { font-size: 13px; color: var(--text-muted); margin-top: 4px; }
+.result-pct { font-size: 22px; font-weight: 700; margin-top: 8px; }
+.result-msg { font-size: 14px; color: var(--text-muted); margin: 12px 0 1.5rem; }
+.empty-state { text-align: center; padding: 3rem 1rem; color: var(--text-muted); }
+/* Willis diagram */
+.willis-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 1.5rem; margin-bottom: 1rem; text-align: center; }
+.willis-wrap svg { max-width: 100%; height: auto; }
+</style>
+</head>
+<body>
+<header>
+  <div class="header-inner">
+    <div class="header-title">脳血管障害 学習ツール</div>
+    <div class="header-sub">血管支配領域 / 閉塞症候 / 高次脳機能障害 / Willis動脈輪</div>
+  </div>
+</header>
+<div class="main">
+  <div class="section-tabs" id="sectionTabs">
+    <button class="section-tab active" onclick="setSection('artery')">血管・支配領域</button>
+    <button class="section-tab" onclick="setSection('syndrome')">閉塞症候</button>
+    <button class="section-tab" onclick="setSection('cortical')">高次脳機能障害</button>
+    <button class="section-tab" onclick="setSection('willis')">Willis動脈輪</button>
+  </div>
+
+  <div class="section-desc" id="sectionDesc"></div>
+
+  <div class="controls" id="controlsBar">
+    <div class="search-wrap">
+      <span class="search-icon">🔍</span>
+      <input type="text" id="searchInput" placeholder="キーワードで絞り込み…" oninput="onSearch()">
+    </div>
+    <div class="mode-group">
+      <button class="mode-btn active" id="btnTable" onclick="setMode('table')">一覧</button>
+      <button class="mode-btn" id="btnQuiz" onclick="setMode('quiz')">クイズ</button>
+    </div>
+    <span class="count-label" id="countLabel"></span>
+  </div>
+
+  <div id="willisView" style="display:none"></div>
+
+  <div id="tableView">
+    <div class="table-wrap"><table><thead id="tableHead"></thead><tbody id="tableBody"></tbody></table></div>
+  </div>
+
+  <div id="quizView" style="display:none">
+    <div class="quiz-wrap">
+      <div>
+        <div class="quiz-progress-bar"><div class="quiz-progress-fill" id="progressFill" style="width:0%"></div></div>
+        <div class="quiz-meta"><span id="quizCounter">1 / 20</span><span id="quizSection"></span></div>
+      </div>
+      <div id="quizContent"></div>
+      <div class="quiz-nav">
+        <div class="score-display"><span class="score-num" id="scoreNum">0</span><span>/ <span id="scoreDen">0</span> 正解</span></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="btn" onclick="restartQuiz()">最初から</button>
+          <button class="btn btn-primary" id="nextBtn" onclick="nextQuiz()" disabled>次へ →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============ DATA ============
+const ARTERY = [
+  { name:'内頸動脈', abbr:'ICA', region:'前・中大脳動脈へ分岐（前方循環の主幹）', supply:'大脳半球の前2/3・眼動脈', note:'閉塞で広範な前方循環梗塞。無症候〜重篤まで側副血行に依存' },
+  { name:'前大脳動脈', abbr:'ACA', region:'大脳半球内側面・前頭葉底部', supply:'一次運動/感覚野の下肢領域・補足運動野・帯状回', note:'下肢に強い麻痺、尿失禁、意欲低下・無為' },
+  { name:'中大脳動脈', abbr:'MCA', region:'大脳半球外側面（広範）', supply:'上肢/顔面の運動感覚野・言語野・レンズ核線条体動脈領域', note:'脳卒中で最も多い。上肢・顔面優位の麻痺、失語（優位半球）、半側空間無視（劣位半球）' },
+  { name:'後大脳動脈', abbr:'PCA', region:'後頭葉・側頭葉内側面・視床', supply:'一次視覚野・視床・海馬', note:'同名半盲（黄斑回避）、視覚失認、記憶障害' },
+  { name:'椎骨動脈', abbr:'VA', region:'延髄・小脳下部', supply:'延髄外側（PICA経由）・脊髄前面', note:'閉塞で延髄外側症候群（ワレンベルグ）を来しうる' },
+  { name:'脳底動脈', abbr:'BA', region:'脳幹（橋・中脳）・小脳', supply:'橋・中脳・小脳上部・PCAへ移行', note:'閉塞は重篤。閉じ込め症候群・意識障害' },
+  { name:'前交通動脈', abbr:'AComA', region:'左右のACAを連結', supply:'側副路（Willis前方）', note:'脳動脈瘤の好発部位。破裂でくも膜下出血' },
+  { name:'後交通動脈', abbr:'PComA', region:'ICAとPCAを連結', supply:'側副路（Willis後方）', note:'動脈瘤好発。動眼神経麻痺を伴うことがある' },
+  { name:'レンズ核線条体動脈', abbr:'LSA', region:'MCA近位(M1)からの穿通枝', supply:'内包・基底核', note:'ラクナ梗塞・高血圧性被殻出血の主座。純粋運動性片麻痺' },
+  { name:'前下小脳動脈', abbr:'AICA', region:'橋外側・小脳前下面', supply:'橋外側・内耳（迷路動脈）', note:'閉塞で橋外側症候群、めまい・難聴' },
+  { name:'後下小脳動脈', abbr:'PICA', region:'延髄外側・小脳下面', supply:'延髄背外側', note:'ワレンベルグ症候群の主因' },
+  { name:'上小脳動脈', abbr:'SCA', region:'小脳上面・橋上部', supply:'小脳半球上部', note:'閉塞で同側性小脳失調' },
+  { name:'前脈絡叢動脈', abbr:'AChA', region:'ICAから分岐', supply:'内包後脚・視索・外側膝状体', note:'閉塞で片麻痺・半身感覚障害・半盲の三徴' },
+];
+
+const SYNDROME = [
+  { name:'ACA梗塞', vessel:'前大脳動脈', symptoms:'下肢優位の対側片麻痺・感覚障害、尿失禁、無為・自発性低下、把握反射', key:'下肢＞上肢の麻痺' },
+  { name:'MCA梗塞（本幹）', vessel:'中大脳動脈', symptoms:'上肢/顔面優位の対側片麻痺・感覚障害、同名半盲、共同偏視（病巣側を向く）', key:'上肢・顔面優位' },
+  { name:'MCA梗塞（優位半球）', vessel:'中大脳動脈（左）', symptoms:'失語（運動性/感覚性/全失語）、失行、ゲルストマン症候群', key:'失語が前面' },
+  { name:'MCA梗塞（劣位半球）', vessel:'中大脳動脈（右）', symptoms:'半側空間無視（USN）、病態失認、着衣失行、構成障害', key:'半側空間無視が前面' },
+  { name:'PCA梗塞', vessel:'後大脳動脈', symptoms:'同名半盲（黄斑回避）、視覚失認、相貌失認、（視床巻き込みで）感覚障害・視床痛', key:'視野障害が前面' },
+  { name:'ラクナ梗塞（純粋運動性）', vessel:'穿通枝（内包後脚）', symptoms:'顔面・上下肢が均等な片麻痺、感覚・高次脳機能は保たれる', key:'感覚・高次脳は正常' },
+  { name:'ラクナ梗塞（純粋感覚性）', vessel:'穿通枝（視床）', symptoms:'対側の半身感覚障害のみ、運動麻痺なし', key:'感覚のみ障害' },
+  { name:'ワレンベルグ症候群', vessel:'PICA／椎骨動脈（延髄外側）', symptoms:'同側：顔面温痛覚障害・ホルネル徴候・小脳失調・嚥下障害・嗄声／対側：体幹四肢の温痛覚障害', key:'交代性感覚障害・嚥下障害' },
+  { name:'ウェーバー症候群', vessel:'中脳（PCA穿通枝）', symptoms:'同側：動眼神経麻痺／対側：片麻痺', key:'同側動眼神経＋対側片麻痺' },
+  { name:'橋外側症候群', vessel:'AICA', symptoms:'同側：顔面麻痺・難聴・めまい・小脳失調／対側：温痛覚障害', key:'難聴・めまいを伴う' },
+  { name:'閉じ込め症候群', vessel:'脳底動脈（橋腹側）', symptoms:'四肢麻痺・構音障害・嚥下障害、意識と垂直眼球運動・瞬目は保たれる', key:'意識清明だが全身麻痺' },
+  { name:'被殻出血', vessel:'レンズ核線条体動脈', symptoms:'対側片麻痺・感覚障害、共同偏視（病巣側）、（優位側で）失語', key:'高血圧性出血で最多' },
+  { name:'視床出血', vessel:'視床膝状体動脈など', symptoms:'対側感覚障害優位、内下方への共同偏視、視床痛、意識障害', key:'感覚障害・眼位異常' },
+  { name:'小脳出血', vessel:'上小脳動脈など', symptoms:'後頭部痛・回転性めまい・嘔吐・体幹失調、麻痺は目立たない', key:'めまい・失調、麻痺なし' },
+];
+
+const CORTICAL = [
+  { name:'運動性失語', abbr:'ブローカ失語', region:'優位半球 前頭葉（下前頭回）', feature:'発話は非流暢・努力性、復唱障害、理解は比較的保たれる', pt:'ジェスチャー・書字の併用、YES/NO質問で意思確認' },
+  { name:'感覚性失語', abbr:'ウェルニッケ失語', region:'優位半球 側頭葉（上側頭回後部）', feature:'発話は流暢だが錯語多く意味不明、理解障害が重度、復唱障害', pt:'短い言葉・視覚提示、環境調整で混乱を減らす' },
+  { name:'全失語', abbr:'Global', region:'優位半球 広範（MCA本幹）', feature:'発話・理解ともに重度障害', pt:'非言語コミュニケーション主体、残存機能を活用' },
+  { name:'伝導失語', abbr:'Conduction', region:'優位半球 弓状束', feature:'理解・発話は比較的良好だが復唱が特異的に障害', pt:'復唱課題より自発話・機能的会話を重視' },
+  { name:'半側空間無視', abbr:'USN', region:'劣位半球（右）頭頂葉が主', feature:'左空間の刺激を見落とす、左からの声かけに反応薄、左半身への無関心', pt:'健側→患側へ注意誘導、環境を右に寄せない、左からのアプローチ訓練' },
+  { name:'病態失認', abbr:'Anosognosia', region:'劣位半球 頭頂葉', feature:'自身の麻痺・障害を認識できない/否認する', pt:'安全管理を最優先、無理な直面化を避け段階的に気づきを促す' },
+  { name:'観念運動失行', abbr:'IM apraxia', region:'優位半球 頭頂葉', feature:'指示された動作の模倣・パントマイムができない（自動的にはできる）', pt:'実物使用・自動運動を活かした課題設定' },
+  { name:'観念失行', abbr:'Ideational apraxia', region:'優位半球 頭頂-後頭', feature:'一連の道具使用の順序が障害される', pt:'工程を分割・手順の視覚化、反復練習' },
+  { name:'構成失行', abbr:'Constructional', region:'頭頂葉（左右とも）', feature:'図の模写・積木など空間的構成が障害', pt:'手がかり線・段階的提示' },
+  { name:'着衣失行', abbr:'Dressing apraxia', region:'劣位半球 頭頂葉', feature:'衣服の上下・前後・左右が分からず着られない', pt:'衣服に目印、手順の言語化・順序提示' },
+  { name:'視覚失認', abbr:'Visual agnosia', region:'後頭-側頭（PCA領域）', feature:'見えているが「何か」がわからない（触れば分かる）', pt:'触覚・聴覚など他感覚での代償' },
+  { name:'相貌失認', abbr:'Prosopagnosia', region:'紡錘状回（右優位）', feature:'顔で人物を識別できない', pt:'声・服装・名札など顔以外の手がかり' },
+  { name:'ゲルストマン症候群', abbr:'Gerstmann', region:'優位半球 角回', feature:'手指失認・左右失認・失書・失算の四徴', pt:'代償手段、日常課題への具体的支援' },
+  { name:'記憶障害', abbr:'Amnesia', region:'海馬・視床・乳頭体（PCA/前脈絡叢等）', feature:'新規記憶の獲得困難（前向性健忘が主）', pt:'手がかり・メモ・スケジュール表など外的補助、誤りなし学習' },
+  { name:'遂行機能障害', abbr:'Dysexecutive', region:'前頭葉（前頭前野）', feature:'計画・段取り・修正が困難、発動性低下', pt:'手順の構造化、チェックリスト、段階的目標設定' },
+  { name:'注意障害', abbr:'Attention', region:'前頭葉・網様体賦活系など', feature:'持続・選択・配分・転換の各注意が低下', pt:'刺激の少ない環境、課題を短く区切る' },
+  { name:'半側身体失認', abbr:'Asomatognosia', region:'劣位半球 頭頂葉', feature:'患側半身を自分のものと認識しない', pt:'患側への注意誘導、身体イメージ再構築' },
+  { name:'純粋失読', abbr:'Alexia', region:'優位半球 後頭-脳梁膨大部（PCA領域）', feature:'書けるが読めない（なぞり読みは可能なことがある）', pt:'なぞり読み・聴覚代償' },
+];
+
+const SECTION_META = {
+  artery:   { label:'血管・支配領域', desc:'脳を灌流する主要動脈と、その支配領域・臨床的意義。前方循環（ICA→ACA/MCA）と後方循環（VA→BA→PCA）の区別が基本。', data:ARTERY },
+  syndrome: { label:'閉塞症候',       desc:'血管の閉塞・出血部位ごとの典型的な欠落症状。「同側／対側」「上肢優位／下肢優位」「交代性」がキーワード。', data:SYNDROME },
+  cortical: { label:'高次脳機能障害', desc:'損傷部位ごとの高次脳機能障害と、PTとしての関わりのポイント。優位半球（左）＝失語系、劣位半球（右）＝無視・失認系が大枠。', data:CORTICAL },
+  willis:   { label:'Willis動脈輪',   desc:'脳底部で前方循環と後方循環を連絡する側副路。一部の血管が閉塞しても灌流を保つ安全装置。動脈瘤の好発部位でもある。', data:[] },
+};
+
+// Column config per section
+const COLUMNS = {
+  artery: [
+    { key:'name', label:'血管名', render:d=>`<div class="primary-cell">${d.name} <span class="mono" style="font-size:11px;color:var(--text-muted)">${d.abbr}</span></div>` },
+    { key:'region', label:'部位', render:d=>d.region },
+    { key:'supply', label:'支配領域', render:d=>d.supply },
+    { key:'note', label:'臨床的意義', render:d=>`<span class="sub-cell">${d.note}</span>` },
+  ],
+  syndrome: [
+    { key:'name', label:'症候名', render:d=>`<div class="primary-cell">${d.name}</div>` },
+    { key:'vessel', label:'責任血管・部位', render:d=>`<span class="badge b-accent">${d.vessel}</span>` },
+    { key:'symptoms', label:'主な症状', render:d=>d.symptoms },
+    { key:'key', label:'鑑別のカギ', render:d=>`<span class="sub-cell">${d.key}</span>` },
+  ],
+  cortical: [
+    { key:'name', label:'障害名', render:d=>`<div class="primary-cell">${d.name}</div><span class="sub-cell mono">${d.abbr}</span>` },
+    { key:'region', label:'主な損傷部位', render:d=>d.region },
+    { key:'feature', label:'特徴', render:d=>d.feature },
+    { key:'pt', label:'PTの関わり', render:d=>`<span class="sub-cell">${d.pt}</span>` },
+  ],
+};
+
+// Quiz builders per section
+const QUIZ_BUILDERS = {
+  artery: [
+    { label:'血管→支配領域', q:d=>`「${d.name}(${d.abbr})」の主な支配領域は？`, ans:d=>d.supply },
+    { label:'血管→部位',     q:d=>`「${d.name}(${d.abbr})」が走行・灌流する部位は？`, ans:d=>d.region },
+    { label:'略語→血管名',   q:d=>`「${d.abbr}」が指す血管は？`, ans:d=>d.name },
+  ],
+  syndrome: [
+    { label:'症候→責任血管', q:d=>`「${d.name}」の責任血管・部位は？`, ans:d=>d.vessel },
+    { label:'症候→症状',     q:d=>`「${d.name}」の主な症状は？`, ans:d=>d.symptoms },
+    { label:'カギ→症候名',   q:d=>`「${d.key}」が特徴的な症候は？`, ans:d=>d.name },
+  ],
+  cortical: [
+    { label:'障害→損傷部位', q:d=>`「${d.name}」の主な損傷部位は？`, ans:d=>d.region },
+    { label:'障害→特徴',     q:d=>`「${d.name}」の特徴は？`, ans:d=>d.feature },
+    { label:'特徴→障害名',   q:d=>`次の特徴に当てはまる障害は？「${d.feature}」`, ans:d=>d.name },
+  ],
+};
+
+let currentSection='artery', currentMode='table', searchTerm='';
+let quizData=[], quizIndex=0, score=0, answered=false;
+
+function getData() { return SECTION_META[currentSection].data; }
+function getFiltered() {
+  const data = getData();
+  if (!searchTerm) return data;
+  const t = searchTerm.toLowerCase();
+  return data.filter(d => Object.values(d).some(v => String(v).toLowerCase().includes(t)));
+}
+
+function renderTable() {
+  const cols = COLUMNS[currentSection];
+  const list = getFiltered();
+  document.getElementById('countLabel').textContent = `${list.length} 件`;
+  document.getElementById('tableHead').innerHTML = `<tr>${cols.map(c=>`<th>${c.label}</th>`).join('')}</tr>`;
+  const tbody = document.getElementById('tableBody');
+  if (!list.length) { tbody.innerHTML=`<tr><td colspan="${cols.length}"><div class="empty-state">該当なし</div></td></tr>`; return; }
+  tbody.innerHTML = list.map(d => `<tr>${cols.map(c=>`<td>${c.render(d)}</td>`).join('')}</tr>`).join('');
+}
+
+function setSection(s) {
+  currentSection = s;
+  searchTerm=''; document.getElementById('searchInput').value='';
+  document.querySelectorAll('.section-tab').forEach((t,i)=>t.classList.toggle('active',['artery','syndrome','cortical','willis'][i]===s));
+  document.getElementById('sectionDesc').textContent = SECTION_META[s].desc;
+  const isWillis = s==='willis';
+  document.getElementById('controlsBar').style.display = isWillis ? 'none' : 'flex';
+  document.getElementById('willisView').style.display = isWillis ? 'block' : 'none';
+  document.getElementById('tableView').style.display = (!isWillis && currentMode==='table') ? 'block' : 'none';
+  document.getElementById('quizView').style.display = (!isWillis && currentMode==='quiz') ? 'block' : 'none';
+  if (isWillis) { renderWillis(); return; }
+  currentMode==='table' ? renderTable() : (buildQuiz(), renderQuiz());
+}
+
+function setMode(m) {
+  currentMode=m;
+  document.getElementById('tableView').style.display = m==='table'?'block':'none';
+  document.getElementById('quizView').style.display = m==='quiz'?'block':'none';
+  document.getElementById('btnTable').classList.toggle('active',m==='table');
+  document.getElementById('btnQuiz').classList.toggle('active',m==='quiz');
+  m==='table' ? renderTable() : (buildQuiz(), renderQuiz());
+}
+
+function onSearch() { searchTerm=document.getElementById('searchInput').value; renderTable(); }
+function shuffle(a){ return [...a].sort(()=>Math.random()-0.5); }
+
+function buildQuiz() {
+  const list = getFiltered();
+  const builders = QUIZ_BUILDERS[currentSection];
+  if (!list.length) { quizData=[]; return; }
+  quizData = shuffle(list).slice(0, Math.min(list.length,20)).map(d => {
+    const b = builders[Math.floor(Math.random()*builders.length)];
+    const correct = b.ans(d);
+    const pool = list.filter(x => b.ans(x)!==correct);
+    const distractors = shuffle(pool).slice(0,3).map(x=>b.ans(x));
+    while (distractors.length<3) distractors.push('—');
+    const label = d.name + (d.abbr?`（${d.abbr}）`:'');
+    return { type:b.label, question:b.q(d), correct, opts:shuffle([correct,...distractors]), hint:label };
+  });
+  quizIndex=0; score=0; answered=false;
+}
+
+function renderQuiz() {
+  const total=quizData.length;
+  document.getElementById('progressFill').style.width = total?`${(quizIndex/total)*100}%`:'0%';
+  document.getElementById('quizCounter').textContent = total?`${quizIndex+1} / ${total}`:'—';
+  document.getElementById('quizSection').textContent = SECTION_META[currentSection].label;
+  document.getElementById('scoreNum').textContent = score;
+  document.getElementById('scoreDen').textContent = quizIndex;
+  document.getElementById('nextBtn').disabled = true;
+  answered=false;
+  const content=document.getElementById('quizContent');
+  if (!quizData.length) { content.innerHTML='<div class="result-card"><p style="color:var(--text-muted)">対象データがありません。</p></div>'; return; }
+  const q=quizData[quizIndex];
+  content.innerHTML = `<div class="quiz-card"><span class="quiz-tag">${q.type}</span><div class="quiz-q">${q.question}</div><div class="options-grid">${q.opts.map((o,i)=>`<button class="option-btn" id="opt${i}" onclick="answer(${i})">${o}</button>`).join('')}</div><div class="hint-box" id="hintBox"><span class="hint-label">正解の項目</span>${q.hint}</div></div>`;
+}
+
+function answer(i) {
+  if (answered) return;
+  answered=true;
+  const q=quizData[quizIndex];
+  for (let j=0;j<q.opts.length;j++){
+    const el=document.getElementById(`opt${j}`); el.disabled=true;
+    if (q.opts[j]===q.correct) el.classList.add('correct');
+    else if (j===i) el.classList.add('wrong');
+  }
+  if (q.opts[i]===q.correct) score++;
+  document.getElementById('hintBox').style.display='block';
+  document.getElementById('nextBtn').disabled=false;
+  document.getElementById('scoreNum').textContent=score;
+  document.getElementById('scoreDen').textContent=quizIndex+1;
+}
+
+function nextQuiz() {
+  quizIndex++;
+  const total=quizData.length;
+  if (quizIndex>=total) {
+    document.getElementById('progressFill').style.width='100%';
+    document.getElementById('nextBtn').disabled=true;
+    document.getElementById('scoreNum').textContent=score;
+    document.getElementById('scoreDen').textContent=total;
+    const pct=Math.round(score/total*100);
+    const msg=pct>=80?'🎉 すばらしい！':pct>=60?'📚 もう一息！':'💪 繰り返し挑戦しよう。';
+    document.getElementById('quizContent').innerHTML=`<div class="result-card"><div class="result-score">${score}</div><div class="result-label">/ ${total} 問正解</div><div class="result-pct">${pct}%</div><div class="result-msg">${msg}</div><button class="btn btn-primary" onclick="restartQuiz()" style="font-size:14px;padding:10px 24px;">もう一度チャレンジ</button></div>`;
+    return;
+  }
+  renderQuiz();
+}
+function restartQuiz(){ buildQuiz(); renderQuiz(); }
+
+// ============ Willis diagram (SVG) ============
+function renderWillis() {
+  document.getElementById('willisView').innerHTML = `
+  <div class="willis-wrap">
+    <svg viewBox="0 0 440 520" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Willis動脈輪の模式図">
+      <defs>
+        <style>
+          .vessel { fill:none; stroke:var(--coral); stroke-width:7; stroke-linecap:round; }
+          .vessel-post { stroke:var(--blue); }
+          .connect { stroke:var(--green); stroke-width:6; }
+          .lbl { font-family:'DM Mono', monospace; font-size:13px; font-weight:700; fill:var(--text); }
+          .lbl-ja { font-family:'Noto Sans JP', sans-serif; font-size:10px; fill:var(--text-muted); }
+          .node { fill:var(--surface); stroke:var(--text-muted); stroke-width:1.5; }
+        </style>
+      </defs>
+      <!-- ACA (top) -->
+      <path class="vessel" d="M175,70 Q175,105 200,120"/>
+      <path class="vessel" d="M265,70 Q265,105 240,120"/>
+      <!-- AComA (connect top) -->
+      <path class="connect" d="M200,120 L240,120"/>
+      <!-- ICA (sides) -->
+      <path class="vessel" d="M120,230 Q140,150 200,120"/>
+      <path class="vessel" d="M320,230 Q300,150 240,120"/>
+      <!-- MCA (branch out from ICA) -->
+      <path class="vessel" d="M120,230 Q80,220 55,240"/>
+      <path class="vessel" d="M320,230 Q360,220 385,240"/>
+      <!-- PComA (connect ICA to PCA) -->
+      <path class="connect" d="M120,230 Q135,285 165,300"/>
+      <path class="connect" d="M320,230 Q305,285 275,300"/>
+      <!-- PCA -->
+      <path class="vessel vessel-post" d="M165,300 Q140,315 130,345"/>
+      <path class="vessel vessel-post" d="M275,300 Q300,315 310,345"/>
+      <!-- BA (bottom center) -->
+      <path class="vessel vessel-post" d="M165,300 Q200,320 220,400"/>
+      <path class="vessel vessel-post" d="M275,300 Q240,320 220,400"/>
+      <!-- VA -->
+      <path class="vessel vessel-post" d="M220,400 Q205,450 185,480"/>
+      <path class="vessel vessel-post" d="M220,400 Q235,450 255,480"/>
+      <!-- nodes -->
+      <circle class="node" cx="200" cy="120" r="5"/>
+      <circle class="node" cx="240" cy="120" r="5"/>
+      <circle class="node" cx="120" cy="230" r="5"/>
+      <circle class="node" cx="320" cy="230" r="5"/>
+      <circle class="node" cx="165" cy="300" r="5"/>
+      <circle class="node" cx="275" cy="300" r="5"/>
+      <circle class="node" cx="220" cy="400" r="5"/>
+      <!-- labels -->
+      <text class="lbl" x="150" y="55" text-anchor="middle">ACA</text>
+      <text class="lbl-ja" x="150" y="42" text-anchor="middle">前大脳動脈</text>
+      <text class="lbl" x="290" y="55" text-anchor="middle">ACA</text>
+      <text class="lbl" x="220" y="112" text-anchor="middle">AComA</text>
+      <text class="lbl-ja" x="220" y="100" text-anchor="middle">前交通</text>
+      <text class="lbl" x="40" y="235" text-anchor="middle">MCA</text>
+      <text class="lbl-ja" x="40" y="222" text-anchor="middle">中大脳</text>
+      <text class="lbl" x="400" y="235" text-anchor="middle">MCA</text>
+      <text class="lbl" x="92" y="180" text-anchor="middle">ICA</text>
+      <text class="lbl-ja" x="92" y="168" text-anchor="middle">内頸</text>
+      <text class="lbl" x="348" y="180" text-anchor="middle">ICA</text>
+      <text class="lbl" x="120" y="270" text-anchor="middle">PComA</text>
+      <text class="lbl-ja" x="120" y="258" text-anchor="middle">後交通</text>
+      <text class="lbl" x="320" y="270" text-anchor="middle">PComA</text>
+      <text class="lbl" x="108" y="352" text-anchor="middle">PCA</text>
+      <text class="lbl-ja" x="108" y="340" text-anchor="middle">後大脳</text>
+      <text class="lbl" x="332" y="352" text-anchor="middle">PCA</text>
+      <text class="lbl" x="255" y="380" text-anchor="middle">BA</text>
+      <text class="lbl-ja" x="255" y="368" text-anchor="middle">脳底動脈</text>
+      <text class="lbl" x="165" y="500" text-anchor="middle">VA</text>
+      <text class="lbl-ja" x="165" y="513" text-anchor="middle">椎骨動脈</text>
+      <text class="lbl" x="275" y="500" text-anchor="middle">VA</text>
+    </svg>
+    <div style="display:flex;gap:16px;justify-content:center;flex-wrap:wrap;margin-top:1rem;font-size:12px;color:var(--text-muted);">
+      <span><span style="display:inline-block;width:14px;height:4px;background:var(--coral);vertical-align:middle;border-radius:2px;"></span> 前方循環（ICA系）</span>
+      <span><span style="display:inline-block;width:14px;height:4px;background:var(--blue);vertical-align:middle;border-radius:2px;"></span> 後方循環（椎骨脳底系）</span>
+      <span><span style="display:inline-block;width:14px;height:4px;background:var(--green);vertical-align:middle;border-radius:2px;"></span> 交通動脈（連絡路）</span>
+    </div>
+  </div>
+  <div class="table-wrap"><table>
+    <thead><tr><th>構成血管</th><th>役割</th></tr></thead>
+    <tbody>
+      <tr><td class="primary-cell">前交通動脈 <span class="mono sub-cell">AComA</span></td><td>左右のACAを連結。Willis前方の要。動脈瘤の最好発部位</td></tr>
+      <tr><td class="primary-cell">後交通動脈 <span class="mono sub-cell">PComA</span></td><td>ICA（前方循環）とPCA（後方循環）を連結。前後をつなぐ側副路</td></tr>
+      <tr><td class="primary-cell">前大脳動脈(A1) <span class="mono sub-cell">ACA</span></td><td>ICAからの分岐部〜AComAまでが輪の一部を構成</td></tr>
+      <tr><td class="primary-cell">内頸動脈 <span class="mono sub-cell">ICA</span></td><td>前方循環の供給源。輪の左右の柱</td></tr>
+      <tr><td class="primary-cell">後大脳動脈(P1) <span class="mono sub-cell">PCA</span></td><td>脳底動脈からの分岐部〜PComAまでが輪の一部</td></tr>
+      <tr><td class="primary-cell">脳底動脈 <span class="mono sub-cell">BA</span></td><td>左右の椎骨動脈が合流。後方循環の供給源として輪の後方へ</td></tr>
+    </tbody>
+  </table></div>
+  <div class="section-desc" style="margin-top:1rem;border-left-color:var(--amber);">
+    <strong>臨床ポイント：</strong>Willis動脈輪が完全な人は健常者でも半数程度とされ、交通動脈の低形成など変異が多い。輪が機能すれば1本の血管が閉塞しても側副路で灌流を代償できるが、変異があると代償できず梗塞範囲が広がる。また前交通・後交通動脈は脳動脈瘤の好発部位で、破裂するとくも膜下出血を来す。
+  </div>`;
+}
+
+// init
+setSection('artery');
+</script>
+</body>
+</html>
